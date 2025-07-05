@@ -7,14 +7,14 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-function FixedHeader() {
+function FixedHeader({ newLink }) {
   return (
-    <div className="flex justify-between items-center bg-white-300 py-5 px-4">
+    <div className="flex justify-between items-center bg-white py-5 px-4">
       <button className="text-2xl cursor-pointer">All Items</button>
       <div className="flex gap-4">
         {/* New */}
         <Link
-          href="#"
+          href={newLink}
           className="p-1 px-3 text-white rounded-sm bg-blue-600 flex items-center space-x-2"
         >
           <Plus className=" w-4 h-4" />
