@@ -8,6 +8,7 @@ function SalesOverview() {
     { title: "Quantity in Hand", number: 10 },
     { title: "Quantity to be received", number: 0 },
   ];
+
   const salesActivity = [
     {
       title: "To be Packed",
@@ -38,25 +39,25 @@ function SalesOverview() {
       color: "text-yellow-600",
     },
   ];
+
   return (
-    <div className="bg-blue-50 border-b border-slate-300  grid grid-cols-12 gap-4">
+    <div className="bg-blue-100 border-b border-slate-300 p-8 grid grid-cols-12 gap-4">
       {/* sales activity */}
-      <div className="p-8 col-span-8 border-r border-slate-300">
+      <div className="col-span-8 border-r border-slate-300 pr-8">
         <h2 className="mb-6 text-xl">Sales Activity</h2>
-        <div className="pr-8 grid grid-cols-4 gap-4">
-          {/* card */}
-          {salesActivity.map((item, i) => {
-            return <SalesActivityCard item={item} key={i} />;
-          })}
+        <div className="grid grid-cols-4 gap-4">
+          {salesActivity.map((item, i) => (
+            <SalesActivityCard item={item} key={i} />
+          ))}
         </div>
       </div>
       {/* inventory summary */}
-      <div className="col-span-4 p-8">
+      <div className="col-span-4">
         <h2 className="mb-6 text-xl">Inventory Summary</h2>
-        <div className="">
-          {inventorySummary.map((item, i) => {
-            return <InventorySummaryCard item={item} key={i} />;
-          })}
+        <div>
+          {inventorySummary.map((item, i) => (
+            <InventorySummaryCard item={item} key={i} />
+          ))}
         </div>
       </div>
     </div>
