@@ -21,11 +21,11 @@ function Sidebar() {
   const inventoryLinks = [
     {
       title: "Items",
-      href: "",
+       href: "/dashboard/inventory",
     },
     {
       title: "Item Groups",
-      href: "",
+      href: "/dashboard/inventory",
     },
     {
       title: "Inventory Adjustments",
