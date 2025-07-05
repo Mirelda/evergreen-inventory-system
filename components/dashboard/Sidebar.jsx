@@ -1,3 +1,4 @@
+"use client";
 import {
   BaggageClaim,
   BarChart4,
@@ -5,14 +6,35 @@ import {
   ChevronLeft,
   Files,
   Home,
+  PlusCircle,
   ShoppingBag,
   ShoppingBasket,
   Store,
 } from "lucide-react";
 import Link from "next/link";
 import SubscriptionCard from "./SubscriptionCard";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import CollapsibleLink from "./CollapsibleLink";
 
 function Sidebar() {
+  const inventoryLinks = [
+    {
+      title: "Items",
+      href: "",
+    },
+    {
+      title: "Item Groups",
+      href: "",
+    },
+    {
+      title: "Inventory Adjustments",
+      href: "",
+    },
+  ];
   return (
     <div className="w-60 min-h-screen bg-slate-800 text-slate-50 fixed flex flex-col justify-between">
       {/* TOP */}
@@ -38,13 +60,24 @@ function Sidebar() {
             <Home className="w-4 h-4" />
             <span>Home</span>
           </Link>
-          {/* PR button and classname */}
-          <button className="cursor-pointer flex items-center space-x-2 p-2">
-            {/* PR */}
-            <BaggageClaim className="w-4 h-4" />
-            <span>Inventory</span>
-          </button>
-          {/* PR new addition */}
+          <Collapsible>
+            <CollapsibleTrigger className="cursor-pointer flex items-center space-x-2 p-2">
+              <BaggageClaim className="w-4 h-4" />
+              <span>Inventory</span>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              {inventoryLinks.map((items, i) => {
+                return (
+                  <CollapsibleLink
+                    key={i}
+                    href={items.href}
+                    title={items.title}
+                  />
+                );
+              })}
+            </CollapsibleContent>
+          </Collapsible>
+
           <button className="cursor-pointer flex items-center space-x-2 p-2">
             <ShoppingBasket className="w-4 h-4" />
             <span>Sales</span>
