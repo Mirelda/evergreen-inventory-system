@@ -36,7 +36,7 @@ function Header() {
           </button>
         </div>
         {/*  */}
-        {}
+        {/* PR */}
         <div className="flex gap-3">
           <button className="flex items-center">
             <span>Walmart</span>
