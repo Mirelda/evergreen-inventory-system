@@ -10,10 +10,11 @@ import {
   Store,
 } from "lucide-react";
 import Link from "next/link";
+import SubscriptionCard from "./SubscriptionCard";
 
 function Sidebar() {
   return (
-    <div className="w-56 min-h-screen bg-slate-800 text-slate-50 justify-between">
+    <div className="w-60 min-h-screen bg-slate-800 text-slate-50 fixed flex flex-col justify-between">
       {/* TOP */}
 
       <div className="flex flex-col">
@@ -27,7 +28,6 @@ function Sidebar() {
           <span className="font-semibold text-xl">Inventory</span>
         </Link>
         {/* Links */}
-
         {/* PR classname */}
         <nav className="flex flex-col gap-3 px-3 py-6">
           {/* PR href and classname */}
@@ -39,17 +39,17 @@ function Sidebar() {
             <span>Home</span>
           </Link>
           {/* PR button and classname */}
-          <button className="flex items-center space-x-2 p-2">
+          <button className="cursor-pointer flex items-center space-x-2 p-2">
             {/* PR */}
             <BaggageClaim className="w-4 h-4" />
             <span>Inventory</span>
           </button>
           {/* PR new addition */}
-          <button className="flex items-center space-x-2 p-2">
+          <button className="cursor-pointer flex items-center space-x-2 p-2">
             <ShoppingBasket className="w-4 h-4" />
             <span>Sales</span>
           </button>
-          <button className="flex items-center space-x-2 p-2">
+          <button className="cursor-pointer flex items-center space-x-2 p-2">
             {/* PR */}
             <ShoppingBag className="w-4 h-4" />
             <span>Purchases</span>
@@ -68,14 +68,15 @@ function Sidebar() {
           </Link>
           {/* PR END */}
         </nav>
+        <SubscriptionCard />
       </div>
 
       {/* Bottom */}
       {/* PR classname */}
-      <div className="flex flex-col justify-end items-center">
-        <div className="bg-slate-950 flex space-x-2 items-center py-3 px-2">
+      <div className="flex flex-col">
+        <button className="cursor-pointer bg-slate-950 flex space-x-2 items-center justify-center py-3 px-2">
           <ChevronLeft />
-        </div>
+        </button>
       </div>
       {/* Subscription card */}
       {/* Footer icon */}
