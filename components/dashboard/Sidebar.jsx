@@ -13,12 +13,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import SubscriptionCard from "./SubscriptionCard";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+
 import CollapsibleLink from "./CollapsibleLink";
+import SidebarDropdownLink from "./SidebarDropdownLink";
 
 function Sidebar() {
   const inventoryLinks = [
@@ -60,23 +57,12 @@ function Sidebar() {
             <Home className="w-4 h-4" />
             <span>Home</span>
           </Link>
-          <Collapsible>
-            <CollapsibleTrigger className="cursor-pointer flex items-center space-x-2 p-2">
-              <BaggageClaim className="w-4 h-4" />
-              <span>Inventory</span>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              {inventoryLinks.map((items, i) => {
-                return (
-                  <CollapsibleLink
-                    key={i}
-                    href={items.href}
-                    title={items.title}
-                  />
-                );
-              })}
-            </CollapsibleContent>
-          </Collapsible>
+
+           <SidebarDropdownLink
+            title="Inventory"
+            items={inventoryLinks}
+            icon={BaggageClaim}
+          />
 
           <button className="cursor-pointer flex items-center space-x-2 p-2">
             <ShoppingBasket className="w-4 h-4" />
