@@ -50,6 +50,7 @@ function NewItem() {
     reset,
     formState: { errors },
   } = useForm();
+
   async function onSubmit(data) {
     data.imageUrl = imageUrl;
     console.log(data);
@@ -81,6 +82,7 @@ function NewItem() {
       alert("Error creating item. Please try again.");
     }
   }
+
   return (
     <div>
       {/* Header */}
@@ -92,62 +94,98 @@ function NewItem() {
         className="w-full max-w-4xl p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:p-6 md:p-8 light:bg-gray-800 light:border-gray-700 mx-auto my-3"
       >
         <div className="grid gap-4 sm:grid-cols-2 sm:gap-6">
-          {/* Comp */}
+          {/* Item Title */}
           <TextInput
             label="Item Title"
             name="title"
             register={register}
             errors={errors}
             className="w-full"
+            validation={{
+              minLength: { value: 2, message: "Title must be at least 2 characters" },
+              maxLength: { value: 100, message: "Title must be less than 100 characters" }
+            }}
           />
 
+          {/* Category */}
           <SelectInput
             name="categoryId"
-            label="Select the Item Category"
+            label="Item Category"
             register={register}
+            errors={errors}
             className="w-full"
             options={categories}
           />
 
+          {/* SKU */}
           <TextInput
             label="Item SKU"
             name="sku"
             register={register}
             errors={errors}
             className="w-full"
+            validation={{
+              pattern: {
+                value: /^[A-Z0-9]{3,20}$/,
+                message: "SKU must be 3-20 characters, uppercase letters and numbers only"
+              }
+            }}
+            placeholder="e.g., ITM001, PROD123"
           />
+
+          {/* Barcode */}
           <TextInput
             label="Item Barcode"
             name="barcode"
             register={register}
             errors={errors}
-            // Optional field
+            isRequired={false}
             className="w-full"
+            validation={{
+              pattern: {
+                value: /^[0-9]{8,13}$/,
+                message: "Barcode must be 8-13 digits"
+              }
+            }}
+            placeholder="e.g., 1234567890123"
           />
+
+          {/* Quantity */}
           <TextInput
             label="Item Quantity"
             name="qty"
             register={register}
             errors={errors}
+            type="number"
             className="w-full"
+            validation={{
+              min: { value: 0, message: "Quantity must be 0 or greater" },
+              max: { value: 999999, message: "Quantity must be less than 1,000,000" }
+            }}
+            placeholder="0"
           />
 
+          {/* Unit */}
           <SelectInput
             name="unitId"
-            label="Select the Item Unit"
+            label="Item Unit"
             register={register}
+            errors={errors}
             className="w-full"
             options={units}
           />
 
+          {/* Brand */}
           <SelectInput
             name="brandId"
-            label="Select the Item Brand"
+            label="Item Brand"
             register={register}
+            errors={errors}
             className="w-full"
             options={brands}
           />
 
+          {/* Buying Price */}
           <TextInput
             label="Buying Price"
             name="buyingPrice"
@@ -155,8 +193,14 @@ function NewItem() {
             errors={errors}
             type="number"
             className="w-full"
+            validation={{
+              min: { value: 0, message: "Price must be 0 or greater" },
+              max: { value: 999999.99, message: "Price must be less than 1,000,000" }
+            }}
+            placeholder="0.00"
           />
 
+          {/* Selling Price */}
           <TextInput
             label="Selling Price"
             name="sellingPrice"
@@ -164,16 +208,24 @@ function NewItem() {
             errors={errors}
             type="number"
             className="w-full"
+            validation={{
+              min: { value: 0, message: "Price must be 0 or greater" },
+              max: { value: 999999.99, message: "Price must be less than 1,000,000" }
+            }}
+            placeholder="0.00"
           />
 
+          {/* Supplier */}
           <SelectInput
             name="supplierId"
-            label="Select the Item Supplier"
+            label="Item Supplier"
             register={register}
+            errors={errors}
             className="w-full"
             options={suppliers}
           />
 
+          {/* Re-Order Point */}
           <TextInput
             label="Re-Order Point"
             name="reOrderPoint"
@@ -181,56 +233,85 @@ function NewItem() {
             errors={errors}
             type="number"
             className="w-full"
+            validation={{
+              min: { value: 0, message: "Re-order point must be 0 or greater" },
+              max: { value: 999999, message: "Re-order point must be less than 1,000,000" }
+            }}
+            placeholder="0"
           />
 
+          {/* Warehouse */}
           <SelectInput
             name="warehouseId"
-            label="Select the Item Warehouse"
+            label="Item Warehouse"
             register={register}
+            errors={errors}
             className="w-full"
             options={warehouses}
           />
 
-          {/* Image */}
-
+          {/* Weight */}
           <TextInput
-            label="Item Weight in Kgs"
+            label="Item Weight (kg)"
             name="weight"
             register={register}
             errors={errors}
             type="number"
             className="w-full"
+            validation={{
+              min: { value: 0, message: "Weight must be 0 or greater" },
+              max: { value: 9999.99, message: "Weight must be less than 10,000 kg" }
+            }}
+            placeholder="0.00"
           />
 
+          {/* Dimensions */}
           <TextInput
-            label="Item Dimensions in cm (20 x 30 x 100)"
+            label="Item Dimensions (cm)"
             name="dimensions"
             register={register}
             errors={errors}
             className="w-full"
+            validation={{
+              pattern: {
+                value: /^\d+\s*x\s*\d+\s*x\s*\d+$/,
+                message: "Format: 20 x 30 x 100 (L x W x H)"
+              }
+            }}
+            placeholder="20 x 30 x 100"
           />
 
+          {/* Tax Rate */}
           <TextInput
-            label="Item Tax Rate in %"
+            label="Tax Rate (%)"
             name="taxRate"
             type="number"
             register={register}
             errors={errors}
             className="w-full"
+            validation={{
+              min: { value: 0, message: "Tax rate must be 0 or greater" },
+              max: { value: 100, message: "Tax rate must be 100% or less" }
+            }}
+            placeholder="0"
           />
 
+          {/* Description */}
           <TextAreaInput
             label="Item Description"
             name="description"
             register={register}
             errors={errors}
+            isRequired={false}
           />
 
+          {/* Notes */}
           <TextAreaInput
             label="Item Notes"
             name="notes"
             register={register}
             errors={errors}
+            isRequired={false}
           />
 
           {/* Image upload */}
@@ -242,13 +323,11 @@ function NewItem() {
               className="w-36 h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md px-4 py-2 transition-colors duration-200"
               endpoint="imageUploader"
               onClientUploadComplete={(res) => {
-                // Handle successful upload
                 setImageUrl(res[0].ufsUrl);
                 console.log(res[0].ufsUrl);
                 alert("Upload Completed");
               }}
               onUploadError={(error) => {
-                // Handle upload error
                 alert(`ERROR! ${error.message}`);
               }}
             />
