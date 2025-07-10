@@ -4,41 +4,45 @@ import { Plus, X } from "lucide-react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import TextInput from "@/components/formInputs/TextInput";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SubmitButton from "@/components/formInputs/SubmitButton";
 import TextAreaInput from "@/components/formInputs/TextAreaInput";
 import SelectInput from "@/components/formInputs/SelectInput";
 import { UploadButton } from "@/lib/uploadthing";
 import { UploadDropzone } from "@uploadthing/react";
+import { getData } from "@/lib/utils";
 
 function NewItem() {
   const [imageUrl, setImageUrl] = useState("");
-  const categories = [
-    { label: "Electronics", value: "asdwfe524643t35tgrf" },
-    { label: "Clothes", value: "rwgrr4363y534tg" },
-  ];
+  const [categories, setCategories] = useState([]);
+  const [units, setUnits] = useState([]);
+  const [brands, setBrands] = useState([]);
+  const [warehouses, setWarehouses] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const units = [
-    { label: "Kg", value: "3567y45heg4345" },
-    { label: "Pcs", value: "ytfgber453235" },
-  ];
+  // Fetch data from API on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [categoriesData, unitsData, brandsData, warehousesData] = await Promise.all([
+          getData('categories'),
+          getData('units'),
+          getData('brands'),
+          getData('warehouse')
+        ]);
 
-  const brands = [
-    { label: "HP", value: "2345t34grwghety" },
-    { label: "Dell", value: "myrthr4354u245" },
-  ];
+        setCategories(categoriesData.map(cat => ({ label: cat.title, value: cat.id })));
+        setUnits(unitsData.map(unit => ({ label: unit.title, value: unit.id })));
+        setBrands(brandsData.map(brand => ({ label: brand.title, value: brand.id })));
+        setWarehouses(warehousesData.map(warehouse => ({ label: warehouse.title, value: warehouse.id })));
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
 
-  const warehouses = [
-    { label: "Warehouse A", value: "htej3545234y54u" },
-    { label: "Warehouse B", value: "zfdhay5w4u5e43" },
-    { label: "Warehouse C", value: "ukyjt3453t2ew" },
-  ];
-
-  const suppliers = [
-    { label: "Supplier A", value: "jrthert4y5443y" },
-    { label: "Supplier B", value: "ukdyrjuts643" },
-    { label: "Supplier C", value: "2463y5u4ehheqr" },
-  ];
+    fetchData();
+  }, []);
 
   const {
     register,
@@ -46,14 +50,12 @@ function NewItem() {
     reset,
     formState: { errors },
   } = useForm();
-  const [loading, setLoading] = useState(false);
   async function onSubmit(data) {
     data.imageUrl = imageUrl;
     console.log(data);
     setLoading(true);
-    const baseUrl = "http://localhost:3000";
     try {
-      const response = await fetch(`${baseUrl}/api/items`, {
+      const response = await fetch('/api/items', {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
