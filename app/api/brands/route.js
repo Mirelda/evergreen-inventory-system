@@ -3,6 +3,29 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+export async function GET() {
+  try {
+    const brands = await prisma.brand.findMany({
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    return NextResponse.json(brands);
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json(
+      {
+        error,
+        message: "Failed to fetch brands",
+      },
+      {
+        status: 500,
+      }
+    );
+  }
+}
+
 export async function POST(request) {
   try {
     const { title } = await request.json();
@@ -27,16 +50,5 @@ export async function POST(request) {
         status: 500,
       }
     );
-  }
-}
-
-export async function GET() {
-  try {
-    const brands = await prisma.brand.findMany({
-      orderBy: { createdAt: 'desc' }
-    });
-    return NextResponse.json(brands);
-  } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

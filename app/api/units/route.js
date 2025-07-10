@@ -3,6 +3,29 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+export async function GET() {
+  try {
+    const units = await prisma.unit.findMany({
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    return NextResponse.json(units);
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json(
+      {
+        error,
+        message: "Failed to fetch units",
+      },
+      {
+        status: 500,
+      }
+    );
+  }
+}
+
 export async function POST(request) {
   try {
     const { title, abbreviation } = await request.json();
@@ -28,16 +51,5 @@ export async function POST(request) {
         status: 500,
       }
     );
-  }
-}
-
-export async function GET() {
-  try {
-    const units = await prisma.unit.findMany({
-      orderBy: { createdAt: 'desc' }
-    });
-    return NextResponse.json(units);
-  } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
