@@ -1,14 +1,24 @@
 import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export async function POST(request) {
   try {
     const { title, description } = await request.json();
 
-    const category = { title, description };
-    console.log(category);
+    // Save to MongoDB
+    const category = await prisma.category.create({
+      data: {
+        title,
+        description,
+      },
+    });
+
     return NextResponse.json(category);
   } catch (error) {
     console.log(error);
+    // Return error response if category creation fails
     return NextResponse.json(
       {
         error,

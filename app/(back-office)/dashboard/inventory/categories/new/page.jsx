@@ -19,7 +19,7 @@ function NewCategory() {
   async function onSubmit(data) {
     console.log(data);
     setLoading(true);
-    const baseUrl = "http://localhost:3000";
+    const baseUrl = "http://localhost:3001";
     try {
       const response = await fetch(`${baseUrl}/api/categories`, {
         method: "POST",

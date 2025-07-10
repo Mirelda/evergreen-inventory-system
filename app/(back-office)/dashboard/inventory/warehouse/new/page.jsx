@@ -24,7 +24,7 @@ function NewWarehouse() {
   async function onSubmit(data) {
     console.log(data);
     setLoading(true);
-    const baseUrl = "http://localhost:3000";
+    const baseUrl = "http://localhost:3001";
     try {
       const response = await fetch(`${baseUrl}/api/warehouse`, {
         method: "POST",
@@ -77,13 +77,13 @@ function NewWarehouse() {
           />
 
           <TextAreaInput
-            label="Category Description"
+            label="Warehouse Description"
             name="description"
             register={register}
             errors={errors}
           />
         </div>
-        <SubmitButton isLoading={loading} title="Category" />
+        <SubmitButton isLoading={loading} title="Warehouse" />
       </form>
     </div>
   );
