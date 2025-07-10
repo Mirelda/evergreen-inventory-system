@@ -24,9 +24,8 @@ function NewWarehouse() {
   async function onSubmit(data) {
     console.log(data);
     setLoading(true);
-    const baseUrl = "http://localhost:3000";
     try {
-      const response = await fetch(`${baseUrl}/api/warehouse`, {
+      const response = await fetch('/api/warehouse', {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -77,13 +76,13 @@ function NewWarehouse() {
           />
 
           <TextAreaInput
-            label="Category Description"
+            label="Warehouse Description"
             name="description"
             register={register}
             errors={errors}
           />
         </div>
-        <SubmitButton isLoading={loading} title="Category" />
+        <SubmitButton isLoading={loading} title="Warehouse" />
       </form>
     </div>
   );

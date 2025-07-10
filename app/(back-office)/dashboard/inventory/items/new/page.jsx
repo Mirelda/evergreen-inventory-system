@@ -61,13 +61,22 @@ function NewItem() {
         body: JSON.stringify(data),
       });
       if (response.ok) {
-        console.log(response);
+        const result = await response.json();
+        console.log("Item created successfully:", result);
         setLoading(false);
         reset();
+        setImageUrl("");
+        alert("Item created successfully!");
+      } else {
+        const errorData = await response.json();
+        console.error("Error creating item:", errorData);
+        setLoading(false);
+        alert("Error creating item. Please try again.");
       }
     } catch (error) {
       setLoading(false);
       console.log(error);
+      alert("Error creating item. Please try again.");
     }
   }
   return (
@@ -110,7 +119,7 @@ function NewItem() {
             name="barcode"
             register={register}
             errors={errors}
-            // isRequired="false"
+            // Optional field
             className="w-full"
           />
           <TextInput
@@ -231,13 +240,13 @@ function NewItem() {
               className="w-36 h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md px-4 py-2 transition-colors duration-200"
               endpoint="imageUploader"
               onClientUploadComplete={(res) => {
-                // Do something with the response
+                // Handle successful upload
                 setImageUrl(res[0].ufsUrl);
                 console.log(res[0].ufsUrl);
                 alert("Upload Completed");
               }}
               onUploadError={(error) => {
-                // Do something with the error.
+                // Handle upload error
                 alert(`ERROR! ${error.message}`);
               }}
             />

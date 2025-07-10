@@ -19,9 +19,8 @@ function NewCategory() {
   async function onSubmit(data) {
     console.log(data);
     setLoading(true);
-    const baseUrl = "http://localhost:3000";
     try {
-      const response = await fetch(`${baseUrl}/api/categories`, {
+      const response = await fetch('/api/categories', {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
