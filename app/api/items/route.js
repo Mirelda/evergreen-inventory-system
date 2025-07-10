@@ -40,11 +40,22 @@ export async function POST(request) {
     return NextResponse.json(
       {
         error,
-        message: "Failed to create a Item",
+        message: "Failed to create an item",
       },
       {
         status: 500,
       }
     );
+  }
+}
+
+export async function GET() {
+  try {
+    const items = await prisma.item.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
+    return NextResponse.json(items);
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
