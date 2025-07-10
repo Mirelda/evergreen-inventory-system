@@ -19,9 +19,8 @@ function NewBrand() {
   async function onSubmit(data) {
     console.log(data);
     setLoading(true);
-    const baseUrl = "http://localhost:3001";
     try {
-      const response = await fetch(`${baseUrl}/api/brands`, {
+      const response = await fetch('/api/brands', {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
