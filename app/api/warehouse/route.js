@@ -32,3 +32,14 @@ export async function POST(request) {
     );
   }
 }
+
+export async function GET() {
+  try {
+    const warehouses = await prisma.warehouse.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
+    return NextResponse.json(warehouses);
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
