@@ -29,3 +29,14 @@ export async function POST(request) {
     );
   }
 }
+
+export async function GET() {
+  try {
+    const brands = await prisma.brand.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
+    return NextResponse.json(brands);
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
