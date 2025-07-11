@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Edit, Trash2, Plus, ChevronDown, ChevronUp, Download, CheckSquare, Square } from "lucide-react";
+import { Search, Edit, Trash2, Plus, ChevronDown, ChevronUp, Download, CheckSquare, Square, Filter, X } from "lucide-react";
 import Link from "next/link";
 
 function DataTable({
@@ -22,6 +22,8 @@ function DataTable({
   onBulkDelete,
   onBulkUpdate,
   onBulkExport,
+  enableAdvancedFiltering = false,
+  filters = [],
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
@@ -29,14 +31,53 @@ function DataTable({
   const [itemsPerPage] = useState(10);
   const [selectedItems, setSelectedItems] = useState(new Set());
   const [selectAll, setSelectAll] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [activeFilters, setActiveFilters] = useState({});
 
-  // Filter data based on search term
+  // Filter data based on search term and active filters
   const filteredData = data.filter((item) => {
-    return columns.some((column) => {
+    // Search term filtering
+    const searchMatch = searchTerm === "" || columns.some((column) => {
       const value = column.accessor ? column.accessor(item) : item[column.key];
       if (value === null || value === undefined) return false;
       return value.toString().toLowerCase().includes(searchTerm.toLowerCase());
     });
+
+    if (!searchMatch) return false;
+
+    // Advanced filtering
+    if (enableAdvancedFiltering && Object.keys(activeFilters).length > 0) {
+      return filters.every((filter) => {
+        const filterValue = activeFilters[filter.key];
+        if (!filterValue || filterValue === "") return true;
+
+        const itemValue = filter.accessor ? filter.accessor(item) : item[filter.key];
+        
+        switch (filter.type) {
+          case "select":
+            return itemValue === filterValue;
+          case "dateRange":
+            if (filterValue.startDate && filterValue.endDate) {
+              const itemDate = new Date(itemValue);
+              const startDate = new Date(filterValue.startDate);
+              const endDate = new Date(filterValue.endDate);
+              return itemDate >= startDate && itemDate <= endDate;
+            }
+            return true;
+          case "numberRange":
+            if (filterValue.min !== undefined && filterValue.max !== undefined) {
+              return itemValue >= filterValue.min && itemValue <= filterValue.max;
+            }
+            return true;
+          case "text":
+            return itemValue?.toString().toLowerCase().includes(filterValue.toLowerCase());
+          default:
+            return true;
+        }
+      });
+    }
+
+    return true;
   });
 
   // Sort data
@@ -140,6 +181,35 @@ function DataTable({
     }
   };
 
+  // Filter handling functions
+  const handleFilterChange = (filterKey, value) => {
+    setActiveFilters(prev => ({
+      ...prev,
+      [filterKey]: value
+    }));
+  };
+
+  const clearFilter = (filterKey) => {
+    setActiveFilters(prev => {
+      const newFilters = { ...prev };
+      delete newFilters[filterKey];
+      return newFilters;
+    });
+  };
+
+  const clearAllFilters = () => {
+    setActiveFilters({});
+  };
+
+  const getActiveFiltersCount = () => {
+    return Object.values(activeFilters).filter(value => {
+      if (typeof value === 'object') {
+        return Object.values(value).some(v => v !== undefined && v !== "");
+      }
+      return value !== undefined && value !== "";
+    }).length;
+  };
+
   // Handle export to CSV
   const handleExport = () => {
     const csvContent = [
@@ -218,6 +288,26 @@ function DataTable({
               className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-64"
             />
           </div>
+          
+          {/* Advanced Filter Toggle */}
+          {enableAdvancedFiltering && (
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                getActiveFiltersCount() > 0
+                  ? 'bg-blue-100 text-blue-700 border border-blue-300'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <Filter className="w-4 h-4" />
+              Filters
+              {getActiveFiltersCount() > 0 && (
+                <span className="bg-blue-600 text-white text-xs rounded-full px-2 py-1">
+                  {getActiveFiltersCount()}
+                </span>
+              )}
+            </button>
+          )}
           
           {/* Export Button */}
           {enableExport && (
@@ -298,6 +388,123 @@ function DataTable({
             >
               Clear Selection
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Advanced Filters Panel */}
+      {enableAdvancedFiltering && showFilters && (
+        <div className="p-4 bg-gray-50 border-b border-gray-200">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-medium text-gray-900">Advanced Filters</h3>
+            <div className="flex items-center gap-2">
+              {getActiveFiltersCount() > 0 && (
+                <button
+                  onClick={clearAllFilters}
+                  className="text-sm text-gray-600 hover:text-gray-800 transition-colors"
+                >
+                  Clear All
+                </button>
+              )}
+              <button
+                onClick={() => setShowFilters(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filters.map((filter) => (
+              <div key={filter.key} className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  {filter.label}
+                </label>
+                
+                {filter.type === "select" && (
+                  <select
+                    value={activeFilters[filter.key] || ""}
+                    onChange={(e) => handleFilterChange(filter.key, e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">All {filter.label}</option>
+                    {filter.options?.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                
+                {filter.type === "dateRange" && (
+                  <div className="flex gap-2">
+                    <input
+                      type="date"
+                      value={activeFilters[filter.key]?.startDate || ""}
+                      onChange={(e) => handleFilterChange(filter.key, {
+                        ...activeFilters[filter.key],
+                        startDate: e.target.value
+                      })}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <input
+                      type="date"
+                      value={activeFilters[filter.key]?.endDate || ""}
+                      onChange={(e) => handleFilterChange(filter.key, {
+                        ...activeFilters[filter.key],
+                        endDate: e.target.value
+                      })}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                )}
+                
+                {filter.type === "numberRange" && (
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      placeholder="Min"
+                      value={activeFilters[filter.key]?.min || ""}
+                      onChange={(e) => handleFilterChange(filter.key, {
+                        ...activeFilters[filter.key],
+                        min: e.target.value ? parseFloat(e.target.value) : undefined
+                      })}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Max"
+                      value={activeFilters[filter.key]?.max || ""}
+                      onChange={(e) => handleFilterChange(filter.key, {
+                        ...activeFilters[filter.key],
+                        max: e.target.value ? parseFloat(e.target.value) : undefined
+                      })}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                )}
+                
+                {filter.type === "text" && (
+                  <input
+                    type="text"
+                    placeholder={`Filter by ${filter.label}`}
+                    value={activeFilters[filter.key] || ""}
+                    onChange={(e) => handleFilterChange(filter.key, e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                )}
+                
+                {activeFilters[filter.key] && (
+                  <button
+                    onClick={() => clearFilter(filter.key)}
+                    className="text-xs text-red-600 hover:text-red-800 transition-colors"
+                  >
+                    Clear filter
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       )}

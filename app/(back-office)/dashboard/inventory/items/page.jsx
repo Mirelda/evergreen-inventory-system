@@ -139,6 +139,52 @@ function Items() {
     console.log('Bulk export for:', selectedIds);
   };
 
+  // Advanced filters configuration
+  const filters = [
+    {
+      key: "category",
+      label: "Category",
+      type: "select",
+      accessor: (item) => item.category?.title,
+      options: [
+        { value: "Electronics", label: "Electronics" },
+        { value: "Clothing", label: "Clothing" },
+        { value: "Books", label: "Books" },
+        { value: "Home & Garden", label: "Home & Garden" },
+      ]
+    },
+    {
+      key: "brand",
+      label: "Brand",
+      type: "select",
+      accessor: (item) => item.brand?.title,
+      options: [
+        { value: "Apple", label: "Apple" },
+        { value: "Samsung", label: "Samsung" },
+        { value: "Nike", label: "Nike" },
+        { value: "Adidas", label: "Adidas" },
+      ]
+    },
+    {
+      key: "sellingPrice",
+      label: "Price Range",
+      type: "numberRange",
+      accessor: (item) => item.sellingPrice,
+    },
+    {
+      key: "quantity",
+      label: "Stock Range",
+      type: "numberRange",
+      accessor: (item) => item.quantity,
+    },
+    {
+      key: "createdAt",
+      label: "Created Date",
+      type: "dateRange",
+      accessor: (item) => item.createdAt,
+    },
+  ];
+
   return (
     <div className="p-6">
       <DataTable
@@ -157,6 +203,8 @@ function Items() {
         onBulkDelete={handleBulkDelete}
         onBulkUpdate={handleBulkUpdate}
         onBulkExport={handleBulkExport}
+        enableAdvancedFiltering={true}
+        filters={filters}
       />
     </div>
   );
