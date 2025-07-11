@@ -89,6 +89,38 @@ function Categories() {
     router.push('/dashboard/inventory/categories/new');
   };
 
+  // Bulk actions
+  const handleBulkDelete = async (selectedIds) => {
+    if (confirm(`Are you sure you want to delete ${selectedIds.length} categories?`)) {
+      try {
+        const deletePromises = selectedIds.map(id => 
+          fetch(`/api/categories/${id}`, { method: 'DELETE' })
+        );
+        
+        const results = await Promise.all(deletePromises);
+        const successCount = results.filter(response => response.ok).length;
+        
+        if (successCount > 0) {
+          setCategories(categories.filter(category => !selectedIds.includes(category.id)));
+          alert(`Successfully deleted ${successCount} categories`);
+        } else {
+          alert('Failed to delete categories');
+        }
+      } catch (error) {
+        console.error('Error bulk deleting categories:', error);
+        alert('Error deleting categories');
+      }
+    }
+  };
+
+  const handleBulkUpdate = (selectedIds) => {
+    alert(`Bulk update for ${selectedIds.length} categories - This feature would open a modal or redirect to bulk update page`);
+  };
+
+  const handleBulkExport = (selectedIds) => {
+    console.log('Bulk export for:', selectedIds);
+  };
+
   return (
     <div className="p-6">
       <DataTable
@@ -103,6 +135,10 @@ function Categories() {
         loading={loading}
         error={error}
         enableExport={true}
+        enableBulkActions={true}
+        onBulkDelete={handleBulkDelete}
+        onBulkUpdate={handleBulkUpdate}
+        onBulkExport={handleBulkExport}
       />
     </div>
   );

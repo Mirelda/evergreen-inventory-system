@@ -74,9 +74,7 @@ function Warehouse() {
   ];
 
   const handleEdit = (warehouse) => {
-    // TODO: Implement edit functionality
-    console.log('Edit warehouse:', warehouse);
-    // router.push(`/dashboard/inventory/warehouse/edit/${warehouse.id}`);
+    router.push(`/dashboard/inventory/warehouse/edit/${warehouse.id}`);
   };
 
   const handleDelete = async (warehouse) => {
@@ -102,6 +100,38 @@ function Warehouse() {
     router.push('/dashboard/inventory/warehouse/new');
   };
 
+  // Bulk actions
+  const handleBulkDelete = async (selectedIds) => {
+    if (confirm(`Are you sure you want to delete ${selectedIds.length} warehouses?`)) {
+      try {
+        const deletePromises = selectedIds.map(id => 
+          fetch(`/api/warehouse/${id}`, { method: 'DELETE' })
+        );
+        
+        const results = await Promise.all(deletePromises);
+        const successCount = results.filter(response => response.ok).length;
+        
+        if (successCount > 0) {
+          setWarehouses(warehouses.filter(warehouse => !selectedIds.includes(warehouse.id)));
+          alert(`Successfully deleted ${successCount} warehouses`);
+        } else {
+          alert('Failed to delete warehouses');
+        }
+      } catch (error) {
+        console.error('Error bulk deleting warehouses:', error);
+        alert('Error deleting warehouses');
+      }
+    }
+  };
+
+  const handleBulkUpdate = (selectedIds) => {
+    alert(`Bulk update for ${selectedIds.length} warehouses - This feature would open a modal or redirect to bulk update page`);
+  };
+
+  const handleBulkExport = (selectedIds) => {
+    console.log('Bulk export for:', selectedIds);
+  };
+
   return (
     <div className="p-6">
       <DataTable
@@ -116,6 +146,10 @@ function Warehouse() {
         loading={loading}
         error={error}
         enableExport={true}
+        enableBulkActions={true}
+        onBulkDelete={handleBulkDelete}
+        onBulkUpdate={handleBulkUpdate}
+        onBulkExport={handleBulkExport}
       />
     </div>
   );

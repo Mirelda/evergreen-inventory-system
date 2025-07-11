@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Edit, Trash2, Plus, ChevronDown, ChevronUp, Download } from "lucide-react";
+import { Search, Edit, Trash2, Plus, ChevronDown, ChevronUp, Download, CheckSquare, Square } from "lucide-react";
 import Link from "next/link";
 
 function DataTable({
@@ -18,11 +18,17 @@ function DataTable({
   error = null,
   className = "",
   enableExport = false,
+  enableBulkActions = false,
+  onBulkDelete,
+  onBulkUpdate,
+  onBulkExport,
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  const [selectedItems, setSelectedItems] = useState(new Set());
+  const [selectAll, setSelectAll] = useState(false);
 
   // Filter data based on search term
   const filteredData = data.filter((item) => {
@@ -66,6 +72,72 @@ function DataTable({
   // Handle page change
   const handlePageChange = (page) => {
     setCurrentPage(page);
+  };
+
+  // Handle bulk selection
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedItems(new Set());
+      setSelectAll(false);
+    } else {
+      setSelectedItems(new Set(currentItems.map(item => item.id)));
+      setSelectAll(true);
+    }
+  };
+
+  const handleSelectItem = (itemId) => {
+    const newSelectedItems = new Set(selectedItems);
+    if (newSelectedItems.has(itemId)) {
+      newSelectedItems.delete(itemId);
+    } else {
+      newSelectedItems.add(itemId);
+    }
+    setSelectedItems(newSelectedItems);
+    setSelectAll(newSelectedItems.size === currentItems.length);
+  };
+
+  // Handle bulk actions
+  const handleBulkDelete = () => {
+    if (selectedItems.size === 0) return;
+    if (onBulkDelete) {
+      onBulkDelete(Array.from(selectedItems));
+    }
+  };
+
+  const handleBulkUpdate = () => {
+    if (selectedItems.size === 0) return;
+    if (onBulkUpdate) {
+      onBulkUpdate(Array.from(selectedItems));
+    }
+  };
+
+  const handleBulkExport = () => {
+    if (selectedItems.size === 0) return;
+    if (onBulkExport) {
+      onBulkExport(Array.from(selectedItems));
+    } else {
+      // Default bulk export behavior
+      const selectedData = sortedData.filter(item => selectedItems.has(item.id));
+      const csvContent = [
+        columns.map(col => col.label).join(','),
+        ...selectedData.map(item => 
+          columns.map(col => {
+            const value = col.accessor ? col.accessor(item) : item[col.key];
+            return `"${value || ''}"`;
+          }).join(',')
+        )
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${title.toLowerCase().replace(/\s+/g, '_')}_selected_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    }
   };
 
   // Handle export to CSV
@@ -181,11 +253,74 @@ function DataTable({
         </div>
       </div>
 
+      {/* Bulk Actions Bar */}
+      {enableBulkActions && selectedItems.size > 0 && (
+        <div className="flex items-center justify-between p-3 bg-blue-50 border-b border-blue-200">
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-blue-900">
+              {selectedItems.size} item{selectedItems.size !== 1 ? 's' : ''} selected
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            {onBulkUpdate && (
+              <button
+                onClick={handleBulkUpdate}
+                className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
+              >
+                <Edit className="w-4 h-4" />
+                Bulk Update
+              </button>
+            )}
+            {onBulkExport && (
+              <button
+                onClick={handleBulkExport}
+                className="flex items-center gap-2 px-3 py-1.5 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                Export Selected
+              </button>
+            )}
+            {onBulkDelete && (
+              <button
+                onClick={handleBulkDelete}
+                className="flex items-center gap-2 px-3 py-1.5 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete Selected
+              </button>
+            )}
+            <button
+              onClick={() => {
+                setSelectedItems(new Set());
+                setSelectAll(false);
+              }}
+              className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              Clear Selection
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
+              {enableBulkActions && (
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <button
+                    onClick={handleSelectAll}
+                    className="flex items-center justify-center w-4 h-4"
+                  >
+                    {selectAll ? (
+                      <CheckSquare className="w-4 h-4 text-blue-600" />
+                    ) : (
+                      <Square className="w-4 h-4 text-gray-400" />
+                    )}
+                  </button>
+                </th>
+              )}
               {columns.map((column) => (
                 <th
                   key={column.key}
@@ -217,7 +352,7 @@ function DataTable({
             {currentItems.length === 0 ? (
               <tr>
                 <td
-                  colSpan={columns.length + (onEdit || onDelete ? 1 : 0)}
+                  colSpan={columns.length + (onEdit || onDelete ? 1 : 0) + (enableBulkActions ? 1 : 0)}
                   className="px-4 py-8 text-center text-gray-500"
                 >
                   {searchTerm ? "No results found" : "No data available"}
@@ -226,6 +361,20 @@ function DataTable({
             ) : (
               currentItems.map((item, index) => (
                 <tr key={item.id || index} className="hover:bg-gray-50">
+                  {enableBulkActions && (
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <button
+                        onClick={() => handleSelectItem(item.id)}
+                        className="flex items-center justify-center w-4 h-4"
+                      >
+                        {selectedItems.has(item.id) ? (
+                          <CheckSquare className="w-4 h-4 text-blue-600" />
+                        ) : (
+                          <Square className="w-4 h-4 text-gray-400" />
+                        )}
+                      </button>
+                    </td>
+                  )}
                   {columns.map((column) => (
                     <td key={column.key} className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                       {formatCellValue(

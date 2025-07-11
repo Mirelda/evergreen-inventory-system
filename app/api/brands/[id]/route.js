@@ -1,0 +1,112 @@
+import { NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+// GET - Fetch a single brand by ID
+export async function GET(request, { params }) {
+  try {
+    const { id } = params;
+    
+    const brand = await prisma.brand.findUnique({
+      where: { id }
+    });
+
+    if (!brand) {
+      return NextResponse.json(
+        { error: 'Brand not found' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(brand);
+  } catch (error) {
+    console.error('Error fetching brand:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+// PUT - Update a brand
+export async function PUT(request, { params }) {
+  try {
+    const { id } = params;
+    const { title } = await request.json();
+
+    // Validate required fields
+    if (!title || title.trim() === '') {
+      return NextResponse.json(
+        { error: 'Title is required' },
+        { status: 400 }
+      );
+    }
+
+    // Check if brand exists
+    const existingBrand = await prisma.brand.findUnique({
+      where: { id }
+    });
+
+    if (!existingBrand) {
+      return NextResponse.json(
+        { error: 'Brand not found' },
+        { status: 404 }
+      );
+    }
+
+    // Update brand
+    const updatedBrand = await prisma.brand.update({
+      where: { id },
+      data: {
+        title: title.trim(),
+        updatedAt: new Date()
+      }
+    });
+
+    return NextResponse.json({
+      message: 'Brand updated successfully',
+      brand: updatedBrand
+    });
+  } catch (error) {
+    console.error('Error updating brand:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE - Delete a brand
+export async function DELETE(request, { params }) {
+  try {
+    const { id } = params;
+
+    // Check if brand exists
+    const existingBrand = await prisma.brand.findUnique({
+      where: { id }
+    });
+
+    if (!existingBrand) {
+      return NextResponse.json(
+        { error: 'Brand not found' },
+        { status: 404 }
+      );
+    }
+
+    // Delete brand
+    await prisma.brand.delete({
+      where: { id }
+    });
+
+    return NextResponse.json({
+      message: 'Brand deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting brand:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+} 
