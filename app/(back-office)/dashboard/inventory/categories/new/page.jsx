@@ -16,6 +16,7 @@ function NewCategory() {
     formState: { errors },
   } = useForm();
   const [loading, setLoading] = useState(false);
+
   async function onSubmit(data) {
     console.log(data);
     setLoading(true);
@@ -31,12 +32,20 @@ function NewCategory() {
         console.log(response);
         setLoading(false);
         reset();
+        alert("Category created successfully!");
+      } else {
+        const errorData = await response.json();
+        console.error("Error creating category:", errorData);
+        setLoading(false);
+        alert("Error creating category. Please try again.");
       }
     } catch (error) {
       setLoading(false);
       console.log(error);
+      alert("Error creating category. Please try again.");
     }
   }
+
   return (
     <div>
       {/* Header */}
@@ -48,42 +57,35 @@ function NewCategory() {
         className="w-full max-w-4xl p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:p-6 md:p-8 light:bg-gray-800 light:border-gray-700 mx-auto my-3"
       >
         <div className="grid gap-4 sm:grid-cols-2 sm:gap-6">
-          {/* Comp */}
+          {/* Category Title */}
           <TextInput
             label="Category Title"
             name="title"
             register={register}
             errors={errors}
+            validation={{
+              minLength: { value: 2, message: "Title must be at least 2 characters" },
+              maxLength: { value: 50, message: "Title must be less than 50 characters" },
+              pattern: {
+                value: /^[a-zA-Z0-9\s\-_]+$/,
+                message: "Title can only contain letters, numbers, spaces, hyphens and underscores"
+              }
+            }}
+            placeholder="e.g., Electronics, Clothing"
           />
-          {/* <div className="sm:col-span-2">
-            <label
-              htmlFor="description"
-              className="block text-sm font-medium leading-6 text-gray-900"
-            >
-              Category Description
-            </label>
-            
-            <div className="mt-2">
-              <textarea
-                {...register("description", { required: true })}
-                id="description"
-                name="description"
-                rows={3}
-                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                defaultValue={""}
-              />
-              {errors.title && (
-                <span className="text-sm text-red-600 ">
-                  Category description is required
-                </span>
-              )}
-            </div>
-          </div> */}
+
+          {/* Category Description */}
           <TextAreaInput
             label="Category Description"
             name="description"
             register={register}
             errors={errors}
+            isRequired={false}
+            validation={{
+              maxLength: { value: 500, message: "Description must be less than 500 characters" }
+            }}
+            placeholder="Brief description of the category"
+            rows={4}
           />
         </div>
         <SubmitButton isLoading={loading} title="Category" />
