@@ -98,6 +98,7 @@ function Brands() {
         addButtonText="New Brand"
         loading={loading}
         error={error}
+        enableExport={true}
       />
     </div>
   );

@@ -64,7 +64,7 @@ function NewWarehouse() {
         <div className="grid gap-4 sm:grid-cols-2 sm:gap-6">
           {/* Warehouse Type */}
           <SelectInput
-            name="type"
+            name="warehouseType"
             label="Warehouse Type"
             register={register}
             errors={errors}

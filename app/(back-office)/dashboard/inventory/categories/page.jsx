@@ -104,6 +104,7 @@ function Categories() {
         addButtonText="New Category"
         loading={loading}
         error={error}
+        enableExport={true}
       />
     </div>
   );

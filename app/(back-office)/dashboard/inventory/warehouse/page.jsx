@@ -115,6 +115,7 @@ function Warehouse() {
         addButtonText="New Warehouse"
         loading={loading}
         error={error}
+        enableExport={true}
       />
     </div>
   );

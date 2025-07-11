@@ -103,6 +103,7 @@ function Units() {
         addButtonText="New Unit"
         loading={loading}
         error={error}
+        enableExport={true}
       />
     </div>
   );

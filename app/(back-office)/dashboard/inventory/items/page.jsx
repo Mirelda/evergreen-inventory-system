@@ -120,6 +120,7 @@ function Items() {
         addButtonText="New Item"
         loading={loading}
         error={error}
+        enableExport={true}
       />
     </div>
   );

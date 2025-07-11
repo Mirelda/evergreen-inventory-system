@@ -1,4 +1,4 @@
 /* app.css */
-@forward "tailwindcss";
+@use "tailwindcss";
 
 @plugin "@tailwindcss/forms";

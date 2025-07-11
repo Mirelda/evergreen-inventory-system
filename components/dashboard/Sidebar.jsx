@@ -21,27 +21,27 @@ function Sidebar() {
   const inventoryLinks = [
     {
       title: "Items",
-      href: "/dashboard/inventory",
+      href: "/dashboard/inventory/items",
     },
     {
       title: "Categories",
-      href: "/dashboard/inventory",
+      href: "/dashboard/inventory/categories",
     },
     {
       title: "Brands",
-      href: "/dashboard/inventory",
+      href: "/dashboard/inventory/brands",
     },
     {
       title: "Units",
-      href: "/dashboard/inventory",
+      href: "/dashboard/inventory/units",
     },
     {
       title: "Warehouse",
-      href: "/dashboard/inventory",
+      href: "/dashboard/inventory/warehouse",
     },
     {
       title: "Inventory Adjustments",
-      href: "",
+      href: "/dashboard/inventory/adjustments",
     },
   ];
 
