@@ -132,6 +132,45 @@ function Warehouse() {
     console.log('Bulk export for:', selectedIds);
   };
 
+  // Advanced filters configuration
+  const filters = [
+    {
+      key: "warehouseType",
+      label: "Warehouse Type",
+      type: "select",
+      accessor: (item) => item.warehouseType,
+      options: [
+        { value: "branch", label: "Branch" },
+        { value: "warehouse", label: "Warehouse" },
+        { value: "store", label: "Store" },
+      ]
+    },
+    {
+      key: "addStockAdjustments",
+      label: "Stock Adjustments",
+      type: "numberRange",
+      accessor: (item) => item.addStockAdjustments?.length || 0,
+    },
+    {
+      key: "createdAt",
+      label: "Created Date",
+      type: "dateRange",
+      accessor: (item) => item.createdAt,
+    },
+    {
+      key: "title",
+      label: "Warehouse Name",
+      type: "text",
+      accessor: (item) => item.title,
+    },
+    {
+      key: "location",
+      label: "Location",
+      type: "text",
+      accessor: (item) => item.location,
+    },
+  ];
+
   return (
     <div className="p-6">
       <DataTable
@@ -150,6 +189,8 @@ function Warehouse() {
         onBulkDelete={handleBulkDelete}
         onBulkUpdate={handleBulkUpdate}
         onBulkExport={handleBulkExport}
+        enableAdvancedFiltering={true}
+        filters={filters}
       />
     </div>
   );

@@ -120,6 +120,34 @@ function Units() {
     console.log('Bulk export for:', selectedIds);
   };
 
+  // Advanced filters configuration
+  const filters = [
+    {
+      key: "items",
+      label: "Items Count",
+      type: "numberRange",
+      accessor: (item) => item.items?.length || 0,
+    },
+    {
+      key: "createdAt",
+      label: "Created Date",
+      type: "dateRange",
+      accessor: (item) => item.createdAt,
+    },
+    {
+      key: "title",
+      label: "Unit Name",
+      type: "text",
+      accessor: (item) => item.title,
+    },
+    {
+      key: "abbreviation",
+      label: "Abbreviation",
+      type: "text",
+      accessor: (item) => item.abbreviation,
+    },
+  ];
+
   return (
     <div className="p-6">
       <DataTable
@@ -138,6 +166,8 @@ function Units() {
         onBulkDelete={handleBulkDelete}
         onBulkUpdate={handleBulkUpdate}
         onBulkExport={handleBulkExport}
+        enableAdvancedFiltering={true}
+        filters={filters}
       />
     </div>
   );
