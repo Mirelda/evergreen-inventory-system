@@ -63,9 +63,7 @@ function Categories() {
   ];
 
   const handleEdit = (category) => {
-    // TODO: Implement edit functionality
-    console.log('Edit category:', category);
-    // router.push(`/dashboard/inventory/categories/edit/${category.id}`);
+    router.push(`/dashboard/inventory/categories/edit/${category.id}`);
   };
 
   const handleDelete = async (category) => {
