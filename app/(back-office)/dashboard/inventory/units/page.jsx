@@ -62,9 +62,7 @@ function Units() {
   ];
 
   const handleEdit = (unit) => {
-    // TODO: Implement edit functionality
-    console.log('Edit unit:', unit);
-    // router.push(`/dashboard/inventory/units/edit/${unit.id}`);
+    router.push(`/dashboard/inventory/units/edit/${unit.id}`);
   };
 
   const handleDelete = async (unit) => {
@@ -90,6 +88,38 @@ function Units() {
     router.push('/dashboard/inventory/units/new');
   };
 
+  // Bulk actions
+  const handleBulkDelete = async (selectedIds) => {
+    if (confirm(`Are you sure you want to delete ${selectedIds.length} units?`)) {
+      try {
+        const deletePromises = selectedIds.map(id => 
+          fetch(`/api/units/${id}`, { method: 'DELETE' })
+        );
+        
+        const results = await Promise.all(deletePromises);
+        const successCount = results.filter(response => response.ok).length;
+        
+        if (successCount > 0) {
+          setUnits(units.filter(unit => !selectedIds.includes(unit.id)));
+          alert(`Successfully deleted ${successCount} units`);
+        } else {
+          alert('Failed to delete units');
+        }
+      } catch (error) {
+        console.error('Error bulk deleting units:', error);
+        alert('Error deleting units');
+      }
+    }
+  };
+
+  const handleBulkUpdate = (selectedIds) => {
+    alert(`Bulk update for ${selectedIds.length} units - This feature would open a modal or redirect to bulk update page`);
+  };
+
+  const handleBulkExport = (selectedIds) => {
+    console.log('Bulk export for:', selectedIds);
+  };
+
   return (
     <div className="p-6">
       <DataTable
@@ -104,6 +134,10 @@ function Units() {
         loading={loading}
         error={error}
         enableExport={true}
+        enableBulkActions={true}
+        onBulkDelete={handleBulkDelete}
+        onBulkUpdate={handleBulkUpdate}
+        onBulkExport={handleBulkExport}
       />
     </div>
   );

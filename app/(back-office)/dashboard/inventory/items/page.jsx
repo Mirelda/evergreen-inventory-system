@@ -105,6 +105,40 @@ function Items() {
     router.push('/dashboard/inventory/items/new');
   };
 
+  // Bulk actions
+  const handleBulkDelete = async (selectedIds) => {
+    if (confirm(`Are you sure you want to delete ${selectedIds.length} items?`)) {
+      try {
+        const deletePromises = selectedIds.map(id => 
+          fetch(`/api/items/${id}`, { method: 'DELETE' })
+        );
+        
+        const results = await Promise.all(deletePromises);
+        const successCount = results.filter(response => response.ok).length;
+        
+        if (successCount > 0) {
+          setItems(items.filter(item => !selectedIds.includes(item.id)));
+          alert(`Successfully deleted ${successCount} items`);
+        } else {
+          alert('Failed to delete items');
+        }
+      } catch (error) {
+        console.error('Error bulk deleting items:', error);
+        alert('Error deleting items');
+      }
+    }
+  };
+
+  const handleBulkUpdate = (selectedIds) => {
+    // For now, just show a message. In a real app, you'd open a modal or redirect to a bulk update page
+    alert(`Bulk update for ${selectedIds.length} items - This feature would open a modal or redirect to bulk update page`);
+  };
+
+  const handleBulkExport = (selectedIds) => {
+    // This will use the default bulk export behavior in DataTable
+    console.log('Bulk export for:', selectedIds);
+  };
+
   return (
     <div className="p-6">
       <DataTable
@@ -119,6 +153,10 @@ function Items() {
         loading={loading}
         error={error}
         enableExport={true}
+        enableBulkActions={true}
+        onBulkDelete={handleBulkDelete}
+        onBulkUpdate={handleBulkUpdate}
+        onBulkExport={handleBulkExport}
       />
     </div>
   );
