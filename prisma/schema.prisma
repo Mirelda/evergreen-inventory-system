@@ -89,6 +89,8 @@ model Item {
   dimensions   String?
   taxRate      Float?
   notes        String?
+  weight       Float?
+  warehouseId  String?
   addStockAdjustments      AddStockAdjustment[]
   transferStockAdjustments TransferStockAdjustment[]
   createdAt    DateTime @default(now())

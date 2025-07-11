@@ -60,7 +60,7 @@ export async function PUT(request, { params }) {
         unitId: data.unitId,
         brandId: data.brandId,
         categoryId: data.categoryId,
-        supplierId: data.supplierId,
+        supplierId: data.supplierId || null,
         unitPrice: data.unitPrice,
         sellingPrice: data.sellingPrice,
         buyingPrice: data.buyingPrice,

@@ -221,6 +221,7 @@ function NewItem() {
             label="Item Supplier"
             register={register}
             errors={errors}
+            isRequired={false}
             className="w-full"
             options={suppliers}
           />
