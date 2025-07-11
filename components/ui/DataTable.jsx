@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Edit, Trash2, Plus, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, Edit, Trash2, Plus, ChevronDown, ChevronUp, Download } from "lucide-react";
 import Link from "next/link";
 
 function DataTable({
@@ -17,6 +17,7 @@ function DataTable({
   loading = false,
   error = null,
   className = "",
+  enableExport = false,
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
@@ -65,6 +66,31 @@ function DataTable({
   // Handle page change
   const handlePageChange = (page) => {
     setCurrentPage(page);
+  };
+
+  // Handle export to CSV
+  const handleExport = () => {
+    const csvContent = [
+      // Header row
+      columns.map(col => col.label).join(','),
+      // Data rows
+      ...sortedData.map(item => 
+        columns.map(col => {
+          const value = col.accessor ? col.accessor(item) : item[col.key];
+          return `"${value || ''}"`;
+        }).join(',')
+      )
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${title.toLowerCase().replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
   };
 
   // Format cell value
@@ -120,6 +146,17 @@ function DataTable({
               className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-64"
             />
           </div>
+          
+          {/* Export Button */}
+          {enableExport && (
+            <button
+              onClick={handleExport}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              <Download className="w-4 h-4" />
+              Export CSV
+            </button>
+          )}
           
           {/* Add Button */}
           {onAdd && (

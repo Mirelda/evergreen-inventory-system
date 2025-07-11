@@ -28,14 +28,14 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-    const { title, location, type, description } = await request.json();
+    const { title, location, warehouseType, description } = await request.json();
 
     // Save warehouse to database
     const warehouse = await prisma.warehouse.create({
       data: {
         title,
         location,
-        type,
+        warehouseType,
         description,
       },
     });
