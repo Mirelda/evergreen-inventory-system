@@ -79,9 +79,7 @@ function Items() {
   ];
 
   const handleEdit = (item) => {
-    // TODO: Implement edit functionality
-    console.log('Edit item:', item);
-    // router.push(`/dashboard/inventory/items/edit/${item.id}`);
+    router.push(`/dashboard/inventory/items/edit/${item.id}`);
   };
 
   const handleDelete = async (item) => {
