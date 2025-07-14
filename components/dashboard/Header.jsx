@@ -1,14 +1,25 @@
-import { Bell, ChevronDown, LayoutGrid, History, Plus, Search, Settings, Users } from "lucide-react";
+import { Bell, ChevronDown, LayoutGrid, History, Plus, Search, Settings, Users, Menu } from "lucide-react";
 import SearchInput from "./SearchInput";
 
 // PR
 import Image from "next/image";
 
-function Header() {
+function Header({ setShowSidebar }) {
+  const handleMenuClick = () => {
+    setShowSidebar(true);
+  };
+
   return (
     // PR classname
     <div className="bg-gray-100 h-12 flex items-center justify-between px-4 md:px-8 border-b border-slate-200">
       <div className="flex gap-2 md:gap-3">
+        {/* Hamburger Menu Button - Only visible on small screens */}
+        <button 
+          onClick={handleMenuClick}
+          className="lg:hidden p-1 rounded-lg hover:bg-slate-200"
+        >
+          <Menu className="w-5 h-5 md:w-6 md:h-6" />
+        </button>
         {/* Recent Activities */}
         <button className="p-1 rounded-lg hover:bg-slate-200">
           <History className="w-5 h-5 md:w-6 md:h-6" />

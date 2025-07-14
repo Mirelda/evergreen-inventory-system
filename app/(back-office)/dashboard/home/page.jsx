@@ -1,3 +1,5 @@
+"use client";
+
 import AnalyticsCard from '@/components/dashboard/AnalyticsCard';
 import ChartCard from '@/components/dashboard/ChartCard';
 import BarChart from '@/components/dashboard/BarChart';
