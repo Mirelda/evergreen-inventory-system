@@ -13,7 +13,6 @@ export async function GET(request, { params }) {
         category: true,
         brand: true,
         unit: true,
-        supplier: true,
       },
     });
 
@@ -60,7 +59,6 @@ export async function PUT(request, { params }) {
         unitId: data.unitId,
         brandId: data.brandId,
         categoryId: data.categoryId,
-        supplierId: data.supplierId || null,
         unitPrice: data.unitPrice,
         sellingPrice: data.sellingPrice,
         buyingPrice: data.buyingPrice,
@@ -74,7 +72,6 @@ export async function PUT(request, { params }) {
         category: true,
         brand: true,
         unit: true,
-        supplier: true,
       },
     });
 
@@ -96,20 +93,16 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
-    await prisma.item.delete({
+    const deletedItem = await prisma.item.delete({
       where: {
         id: params.id,
       },
     });
 
-    return NextResponse.json(
-      {
-        message: "Item deleted successfully",
-      },
-      {
-        status: 200,
-      }
-    );
+    return NextResponse.json({
+      message: "Item deleted successfully",
+      item: deletedItem,
+    });
   } catch (error) {
     console.log(error);
     return NextResponse.json(
@@ -122,4 +115,6 @@ export async function DELETE(request, { params }) {
       }
     );
   }
-} 
+}
+
+ 

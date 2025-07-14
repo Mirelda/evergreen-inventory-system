@@ -85,30 +85,17 @@ export async function PUT(request, { params }) {
   }
 }
 
-// DELETE - Delete a unit
 export async function DELETE(request, { params }) {
   try {
     const { id } = params;
-
-    // Check if unit exists
-    const existingUnit = await prisma.unit.findUnique({
-      where: { id }
-    });
-
-    if (!existingUnit) {
-      return NextResponse.json(
-        { error: 'Unit not found' },
-        { status: 404 }
-      );
-    }
-
-    // Delete unit
-    await prisma.unit.delete({
+    
+    const deletedUnit = await prisma.unit.delete({
       where: { id }
     });
 
     return NextResponse.json({
-      message: 'Unit deleted successfully'
+      message: 'Unit deleted successfully',
+      unit: deletedUnit
     });
   } catch (error) {
     console.error('Error deleting unit:', error);
@@ -117,4 +104,6 @@ export async function DELETE(request, { params }) {
       { status: 500 }
     );
   }
-} 
+}
+
+ 

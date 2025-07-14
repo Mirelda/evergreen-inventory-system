@@ -10,7 +10,6 @@ export async function GET() {
         category: true,
         brand: true,
         unit: true,
-        supplier: true,
       },
       orderBy: {
         createdAt: 'desc'
@@ -48,7 +47,6 @@ export async function POST(request) {
         quantity: data.qty ? parseInt(data.qty) : 0,
         unitId: data.unitId,
         brandId: data.brandId,
-        supplierId: data.supplierId || null,
         buyingPrice: data.buyingPrice ? parseFloat(data.buyingPrice) : 0,
         sellingPrice: data.sellingPrice ? parseFloat(data.sellingPrice) : 0,
         unitPrice: data.unitPrice ? parseFloat(data.unitPrice) : (data.buyingPrice ? parseFloat(data.buyingPrice) : 0),

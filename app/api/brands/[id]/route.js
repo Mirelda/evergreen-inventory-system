@@ -77,30 +77,17 @@ export async function PUT(request, { params }) {
   }
 }
 
-// DELETE - Delete a brand
 export async function DELETE(request, { params }) {
   try {
     const { id } = params;
-
-    // Check if brand exists
-    const existingBrand = await prisma.brand.findUnique({
-      where: { id }
-    });
-
-    if (!existingBrand) {
-      return NextResponse.json(
-        { error: 'Brand not found' },
-        { status: 404 }
-      );
-    }
-
-    // Delete brand
-    await prisma.brand.delete({
+    
+    const deletedBrand = await prisma.brand.delete({
       where: { id }
     });
 
     return NextResponse.json({
-      message: 'Brand deleted successfully'
+      message: 'Brand deleted successfully',
+      brand: deletedBrand
     });
   } catch (error) {
     console.error('Error deleting brand:', error);
@@ -109,4 +96,6 @@ export async function DELETE(request, { params }) {
       { status: 500 }
     );
   }
-} 
+}
+
+ 

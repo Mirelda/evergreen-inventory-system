@@ -6,6 +6,9 @@ const prisma = new PrismaClient();
 export async function GET() {
   try {
     const warehouses = await prisma.warehouse.findMany({
+      include: {
+        addStockAdjustments: true,
+      },
       orderBy: {
         createdAt: 'desc'
       }
@@ -37,6 +40,9 @@ export async function POST(request) {
         location,
         warehouseType,
         description,
+      },
+      include: {
+        addStockAdjustments: true,
       },
     });
 

@@ -60,11 +60,11 @@ model Item {
   barcode      String?
   quantity     Int      @default(0)
   unitId       String   @db.ObjectId
-  unit         Unit     @relation(fields: [unitId], references: [id])
+  unit         Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
   brandId      String   @db.ObjectId
-  brand        Brand    @relation(fields: [brandId], references: [id])
+  brand        Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
   categoryId   String   @db.ObjectId
-  category     Category @relation(fields: [categoryId], references: [id])
+  category     Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   unitPrice    Float
   sellingPrice Float
   buyingPrice  Float
@@ -86,9 +86,9 @@ model AddStockAdjustment {
   referenceNumber  String
   addStockQuantity Int
   itemId           String    @db.ObjectId
-  item             Item      @relation(fields: [itemId], references: [id])
+  item             Item      @relation(fields: [itemId], references: [id], onDelete: Cascade)
   warehouseId      String    @db.ObjectId
-  warehouse        Warehouse @relation(fields: [warehouseId], references: [id])
+  warehouse        Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
   notes            String?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
@@ -99,7 +99,7 @@ model TransferStockAdjustment {
   referenceNumber       String
   transferStockQuantity Int
   itemId                String     @db.ObjectId
-  item                  Item       @relation(fields: [itemId], references: [id])
+  item                  Item       @relation(fields: [itemId], references: [id], onDelete: Cascade)
   givingWarehouseId     String
   receivingWarehouseId  String
   notes                 String?

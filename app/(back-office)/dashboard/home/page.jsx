@@ -1,6 +1,3 @@
-'use client';
-
-import { useState, useEffect } from 'react';
 import AnalyticsCard from '@/components/dashboard/AnalyticsCard';
 import ChartCard from '@/components/dashboard/ChartCard';
 import BarChart from '@/components/dashboard/BarChart';
@@ -16,57 +13,23 @@ import {
   Calendar
 } from 'lucide-react';
 
-function DashboardPage() {
-  const [analytics, setAnalytics] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchAnalytics = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch('/api/analytics/overview');
-        if (!response.ok) {
-          throw new Error('Failed to fetch analytics');
-        }
-        const data = await response.json();
-        setAnalytics(data);
-        setError(null);
-      } catch (err) {
-        setError('Failed to load dashboard data');
-        console.error('Error fetching analytics:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAnalytics();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
+async function getAnalytics() {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/analytics/overview`, {
+      cache: 'no-store',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch analytics');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching analytics:', error);
+    throw error;
   }
+}
 
-  if (error) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-red-600">Error: {error}</p>
-      </div>
-    );
-  }
-
-  if (!analytics) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-gray-500">No data available</p>
-      </div>
-    );
-  }
-
+async function DashboardPage() {
+  const analytics = await getAnalytics();
   const { metrics, charts, growth } = analytics;
 
   return (
