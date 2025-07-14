@@ -6,6 +6,9 @@ const prisma = new PrismaClient();
 export async function GET() {
   try {
     const units = await prisma.unit.findMany({
+      include: {
+        items: true,
+      },
       orderBy: {
         createdAt: 'desc'
       }
@@ -35,6 +38,9 @@ export async function POST(request) {
       data: {
         title,
         abbreviation,
+      },
+      include: {
+        items: true,
       },
     });
 

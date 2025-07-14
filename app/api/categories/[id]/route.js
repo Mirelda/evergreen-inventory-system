@@ -75,20 +75,16 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
-    await prisma.category.delete({
+    const deletedCategory = await prisma.category.delete({
       where: {
         id: params.id,
       },
     });
 
-    return NextResponse.json(
-      {
-        message: "Category deleted successfully",
-      },
-      {
-        status: 200,
-      }
-    );
+    return NextResponse.json({
+      message: "Category deleted successfully",
+      category: deletedCategory,
+    });
   } catch (error) {
     console.log(error);
     return NextResponse.json(
@@ -101,4 +97,6 @@ export async function DELETE(request, { params }) {
       }
     );
   }
-} 
+}
+
+ 

@@ -6,6 +6,9 @@ const prisma = new PrismaClient();
 export async function GET() {
   try {
     const brands = await prisma.brand.findMany({
+      include: {
+        items: true,
+      },
       orderBy: {
         createdAt: 'desc'
       }
@@ -34,6 +37,9 @@ export async function POST(request) {
     const brand = await prisma.brand.create({
       data: {
         title,
+      },
+      include: {
+        items: true,
       },
     });
 

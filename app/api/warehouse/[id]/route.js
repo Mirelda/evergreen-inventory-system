@@ -94,30 +94,17 @@ export async function PUT(request, { params }) {
   }
 }
 
-// DELETE - Delete a warehouse
 export async function DELETE(request, { params }) {
   try {
     const { id } = params;
-
-    // Check if warehouse exists
-    const existingWarehouse = await prisma.warehouse.findUnique({
-      where: { id }
-    });
-
-    if (!existingWarehouse) {
-      return NextResponse.json(
-        { error: 'Warehouse not found' },
-        { status: 404 }
-      );
-    }
-
-    // Delete warehouse
-    await prisma.warehouse.delete({
+    
+    const deletedWarehouse = await prisma.warehouse.delete({
       where: { id }
     });
 
     return NextResponse.json({
-      message: 'Warehouse deleted successfully'
+      message: 'Warehouse deleted successfully',
+      warehouse: deletedWarehouse
     });
   } catch (error) {
     console.error('Error deleting warehouse:', error);
