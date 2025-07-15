@@ -46,13 +46,13 @@ function Brands() {
       key: "createdAt",
       label: "Created",
       sortable: true,
-      format: (value) => new Date(value).toLocaleDateString(),
+      type: "date",
     },
     {
       key: "updatedAt",
       label: "Updated",
       sortable: true,
-      format: (value) => new Date(value).toLocaleDateString(),
+      type: "date",
     },
   ];
 

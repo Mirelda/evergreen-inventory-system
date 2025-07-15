@@ -239,18 +239,77 @@ function DataTable({
   const formatCellValue = (value, column) => {
     if (value === null || value === undefined) return "-";
     
+    // Custom format function
     if (column.format) {
       return column.format(value);
     }
     
+    // Date formatting
+    if (column.type === "date" || column.key?.toLowerCase().includes("date") || column.key?.toLowerCase().includes("at")) {
+      if (value instanceof Date || typeof value === "string") {
+        try {
+          const date = new Date(value);
+          if (!isNaN(date.getTime())) {
+            return date.toLocaleDateString("tr-TR", {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit"
+            });
+          }
+        } catch (e) {
+          // Fallback to string if date parsing fails
+        }
+      }
+    }
+    
+    // Image URL handling
+    if (column.type === "image" || column.key?.toLowerCase().includes("image") || column.key?.toLowerCase().includes("url")) {
+      if (typeof value === "string" && (value.startsWith("http") || value.startsWith("/"))) {
+        return (
+          <div className="flex items-center justify-center">
+            <img 
+              src={value} 
+              alt="Preview" 
+              className="w-12 h-12 object-cover rounded-md border border-gray-200"
+              onError={(e) => {
+                e.target.style.display = "none";
+                e.target.nextSibling.style.display = "block";
+              }}
+            />
+            <span className="hidden text-xs text-gray-500">Resim yüklenemedi</span>
+          </div>
+        );
+      }
+    }
+    
+    // Nested object handling (dot notation)
+    if (column.key && column.key.includes(".")) {
+      const keys = column.key.split(".");
+      let nestedValue = value;
+      for (const key of keys) {
+        if (nestedValue && typeof nestedValue === "object") {
+          nestedValue = nestedValue[key];
+        } else {
+          nestedValue = null;
+          break;
+        }
+      }
+      return formatCellValue(nestedValue, { ...column, key: keys[keys.length - 1] });
+    }
+    
+    // Boolean handling
     if (typeof value === "boolean") {
-      return value ? "Yes" : "No";
+      return value ? "Evet" : "Hayır";
     }
     
+    // Number formatting
     if (typeof value === "number") {
-      return value.toLocaleString();
+      return value.toLocaleString("tr-TR");
     }
     
+    // Default string handling
     return value.toString();
   };
 
