@@ -98,6 +98,32 @@ export async function DELETE(request, { params }) {
   try {
     const id = await params.id;
     
+    // Check if warehouse exists
+    const warehouse = await prisma.warehouse.findUnique({
+      where: { id },
+      include: {
+        addStockAdjustments: true
+      }
+    });
+
+    if (!warehouse) {
+      return NextResponse.json(
+        { error: 'Warehouse not found' },
+        { status: 404 }
+      );
+    }
+
+    // Check if warehouse has related stock adjustments
+    if (warehouse.addStockAdjustments.length > 0) {
+      return NextResponse.json(
+        { 
+          error: 'Cannot delete warehouse',
+          message: 'This warehouse has associated stock adjustments and cannot be deleted. Please remove all related stock adjustments first.'
+        },
+        { status: 400 }
+      );
+    }
+
     const deletedWarehouse = await prisma.warehouse.delete({
       where: { id }
     });
@@ -108,6 +134,18 @@ export async function DELETE(request, { params }) {
     });
   } catch (error) {
     console.error('Error deleting warehouse:', error);
+    
+    // Check if it's a Prisma relation error
+    if (error.code === 'P2014') {
+      return NextResponse.json(
+        { 
+          error: 'Cannot delete warehouse',
+          message: 'This warehouse has associated stock adjustments and cannot be deleted. Please remove all related stock adjustments first.'
+        },
+        { status: 400 }
+      );
+    }
+    
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -93,7 +93,7 @@ function Sidebar({ showSidebar, setShowSidebar, collapsed, setCollapsed }) {
   return (
     <aside
       className={`
-        fixed lg:static top-0 left-0 h-full ${collapsed ? 'w-16' : 'w-60'} bg-slate-800 text-slate-50 z-50 flex flex-col
+        fixed lg:static top-0 left-0 min-h-screen ${collapsed ? 'w-16' : 'w-60'} bg-slate-800 text-slate-50 z-50 flex flex-col
         transition-all duration-300
         ${showSidebar ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0

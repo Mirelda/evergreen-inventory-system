@@ -96,7 +96,6 @@ export default function EditUnitPage() {
       if (response.ok) {
         const result = await response.json();
         console.log('Unit updated successfully:', result);
-        alert('Unit updated successfully!');
         router.push('/dashboard/inventory/units');
       } else {
         const errorData = await response.json();

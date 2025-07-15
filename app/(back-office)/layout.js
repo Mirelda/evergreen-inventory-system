@@ -9,7 +9,7 @@ export default function Layout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="flex h-screen">
+    <div className="flex min-h-screen bg-slate-100">
       {/* Mobilde sidebar açıkken overlay */}
       {showSidebar && (
         <div
@@ -18,9 +18,11 @@ export default function Layout({ children }) {
         />
       )}
       <Sidebar showSidebar={showSidebar} setShowSidebar={setShowSidebar} collapsed={collapsed} setCollapsed={setCollapsed} />
-      <main className="flex-1 h-full bg-slate-100">
+      <main className="flex-1 flex flex-col min-h-screen">
         <Header setShowSidebar={setShowSidebar} />
-        {children}
+        <div className="flex-1">
+          {children}
+        </div>
       </main>
     </div>
   );
