@@ -1,16 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import FormHeader from '@/components/dashboard/FormHeader';
 import TextInput from '@/components/formInputs/TextInput';
 import TextAreaInput from '@/components/formInputs/TextAreaInput';
 import SelectInput from '@/components/formInputs/SelectInput';
 import SubmitButton from '@/components/formInputs/SubmitButton';
 
-export default function EditWarehousePage({ params }) {
+export default function EditWarehousePage() {
   const router = useRouter();
-  const { id } = params;
+  const params = useParams();
+  const id = params.id;
   
   const [formData, setFormData] = useState({
     title: '',
@@ -177,7 +178,6 @@ export default function EditWarehousePage({ params }) {
       <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <FormHeader 
           title="Edit Warehouse" 
-          subtitle="Update warehouse information"
           backUrl="/dashboard/inventory/warehouse"
         />
         
@@ -191,7 +191,7 @@ export default function EditWarehousePage({ params }) {
                 onChange={(value) => handleInputChange('title', value)}
                 error={errors.title}
                 placeholder="Enter warehouse title"
-                required
+                isRequired={true}
               />
               <SelectInput
                 label="Warehouse Type"
@@ -201,7 +201,7 @@ export default function EditWarehousePage({ params }) {
                 error={errors.warehouseType}
                 options={warehouseTypeOptions}
                 placeholder="Select warehouse type"
-                required
+                isRequired={true}
               />
             </div>
 
@@ -212,7 +212,7 @@ export default function EditWarehousePage({ params }) {
               onChange={(value) => handleInputChange('location', value)}
               error={errors.location}
               placeholder="Enter warehouse location (address)"
-              required
+              isRequired={true}
             />
 
             <TextAreaInput

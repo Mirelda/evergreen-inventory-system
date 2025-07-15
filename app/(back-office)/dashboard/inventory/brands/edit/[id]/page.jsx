@@ -1,14 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import FormHeader from '@/components/dashboard/FormHeader';
 import TextInput from '@/components/formInputs/TextInput';
 import SubmitButton from '@/components/formInputs/SubmitButton';
 
-export default function EditBrandPage({ params }) {
+export default function EditBrandPage() {
   const router = useRouter();
-  const { id } = params;
+  const params = useParams();
+  const id = params.id;
   
   const [formData, setFormData] = useState({
     title: ''
@@ -145,8 +146,7 @@ export default function EditBrandPage({ params }) {
       <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <FormHeader 
           title="Edit Brand" 
-          subtitle="Update brand information"
-          backUrl="/dashboard/inventory/brands"
+          href="/dashboard/inventory/brands"
         />
         
         <div className="mt-8 bg-white shadow rounded-lg">
@@ -159,7 +159,7 @@ export default function EditBrandPage({ params }) {
                 onChange={(value) => handleInputChange('title', value)}
                 error={errors.title}
                 placeholder="Enter brand title"
-                required
+                isRequired={true}
               />
             </div>
 
