@@ -74,7 +74,7 @@ function Items() {
       key: "createdAt",
       label: "Created",
       sortable: true,
-      format: (value) => new Date(value).toLocaleDateString(),
+      type: "date",
     },
   ];
 

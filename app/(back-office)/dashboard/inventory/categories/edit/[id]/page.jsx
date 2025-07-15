@@ -65,6 +65,8 @@ function EditCategory() {
 
       if (response.ok) {
         alert('Category updated successfully!');
+        // Refresh the cache and navigate back
+        router.refresh();
         router.push('/dashboard/inventory/categories');
       } else {
         const errorData = await response.json();

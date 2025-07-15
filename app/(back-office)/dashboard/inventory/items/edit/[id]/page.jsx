@@ -101,6 +101,8 @@ function EditItem() {
 
       if (response.ok) {
         alert('Item updated successfully!');
+        // Refresh the cache and navigate back
+        router.refresh();
         router.push('/dashboard/inventory/items');
       } else {
         const errorData = await response.json();

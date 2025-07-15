@@ -118,6 +118,8 @@ export default function EditWarehousePage() {
       if (response.ok) {
         const result = await response.json();
         console.log('Warehouse updated successfully:', result);
+        // Refresh the cache and navigate back
+        router.refresh();
         router.push('/dashboard/inventory/warehouse');
       } else {
         const errorData = await response.json();
