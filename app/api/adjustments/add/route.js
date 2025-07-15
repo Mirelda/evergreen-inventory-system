@@ -3,6 +3,36 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+// GET /api/adjustments/add
+export async function GET() {
+  try {
+    const adjustments = await prisma.addStockAdjustment.findMany({
+      include: {
+        item: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+        warehouse: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return NextResponse.json(adjustments);
+  } catch (error) {
+    console.error("Get add stock adjustments error:", error);
+    return NextResponse.json({ error: "Failed to fetch adjustments." }, { status: 500 });
+  }
+}
+
 // POST /api/adjustments/add
 export async function POST(request) {
   try {

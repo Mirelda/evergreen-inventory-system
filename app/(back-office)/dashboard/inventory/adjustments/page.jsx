@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import AdjustmentForm from "@/components/dashboard/AdjustmentForm";
+import DataTable from "@/components/ui/DataTable";
 
 export default function AdjustmentsPage() {
   const [items, setItems] = useState([]);
@@ -28,24 +29,96 @@ export default function AdjustmentsPage() {
     fetchData();
   }, [refresh]);
 
+  // Format date for display
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('tr-TR', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  // Add Stock table columns
+  const addColumns = [
+    { key: 'referenceNumber', label: 'Reference No' },
+    { 
+      key: 'item', 
+      label: 'Item', 
+      accessor: (item) => item.item?.title || 'Unknown'
+    },
+    { 
+      key: 'warehouse', 
+      label: 'Warehouse', 
+      accessor: (item) => item.warehouse?.title || 'Unknown'
+    },
+    { key: 'addStockQuantity', label: 'Quantity' },
+    { key: 'notes', label: 'Notes' },
+    { 
+      key: 'createdAt', 
+      label: 'Date', 
+      accessor: (item) => formatDate(item.createdAt)
+    },
+  ];
+
+  // Transfer table columns
+  const transferColumns = [
+    { key: 'referenceNumber', label: 'Reference No' },
+    { 
+      key: 'item', 
+      label: 'Item', 
+      accessor: (item) => item.item?.title || 'Unknown'
+    },
+    { 
+      key: 'givingWarehouse', 
+      label: 'From', 
+      accessor: (item) => item.givingWarehouse?.title || 'Unknown'
+    },
+    { 
+      key: 'receivingWarehouse', 
+      label: 'To', 
+      accessor: (item) => item.receivingWarehouse?.title || 'Unknown'
+    },
+    { key: 'transferStockQuantity', label: 'Quantity' },
+    { key: 'notes', label: 'Notes' },
+    { 
+      key: 'createdAt', 
+      label: 'Date', 
+      accessor: (item) => formatDate(item.createdAt)
+    },
+  ];
+
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Stock Adjustments</h1>
-      <div className="flex gap-4 mb-6">
+    <div className="p-4 lg:p-6">
+      <h1 className="text-2xl font-bold mb-6">Stock Adjustments</h1>
+      
+      {/* Tab Buttons */}
+      <div className="flex gap-2 mb-6">
         <button
-          className={`px-4 py-2 rounded ${tab === "add" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            tab === "add" 
+              ? "bg-blue-600 text-white shadow-md" 
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+          }`}
           onClick={() => setTab("add")}
         >
           Add Stock
         </button>
         <button
-          className={`px-4 py-2 rounded ${tab === "transfer" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            tab === "transfer" 
+              ? "bg-blue-600 text-white shadow-md" 
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+          }`}
           onClick={() => setTab("transfer")}
         >
           Transfer Stock
         </button>
       </div>
-      <div className="mb-8">
+
+      {/* Form Section */}
+      <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
         {tab === "add" ? (
           <AdjustmentForm
             type="add"
@@ -62,25 +135,46 @@ export default function AdjustmentsPage() {
           />
         )}
       </div>
-      <div>
-        <h2 className="text-lg font-semibold mb-2">Add Stock History</h2>
-        <ul className="mb-8">
-          {addAdjustments.length === 0 && <li className="text-gray-500">No records.</li>}
-          {addAdjustments.map(adj => (
-            <li key={adj.id} className="border-b py-2 text-sm">
-              <b>{adj.referenceNumber}</b> - Item: {adj.itemId} - Warehouse: {adj.warehouseId} - Quantity: {adj.addStockQuantity} - Notes: {adj.notes}
-            </li>
-          ))}
-        </ul>
-        <h2 className="text-lg font-semibold mb-2">Transfer Stock History</h2>
-        <ul>
-          {transferAdjustments.length === 0 && <li className="text-gray-500">No records.</li>}
-          {transferAdjustments.map(adj => (
-            <li key={adj.id} className="border-b py-2 text-sm">
-              <b>{adj.referenceNumber}</b> - Item: {adj.itemId} - Giving Warehouse: {adj.givingWarehouseId} - Receiving Warehouse: {adj.receivingWarehouseId} - Quantity: {adj.transferStockQuantity} - Notes: {adj.notes}
-            </li>
-          ))}
-        </ul>
+
+      {/* History Section */}
+      <div className="space-y-8">
+        {/* Add Stock History */}
+        <div className="bg-white rounded-lg shadow-sm border">
+          <div className="p-6 border-b">
+            <h2 className="text-lg font-semibold text-gray-900">Add Stock History</h2>
+          </div>
+          <div className="p-6">
+            {addAdjustments.length === 0 ? (
+              <p className="text-gray-500 text-center py-8">No add stock records found.</p>
+            ) : (
+              <DataTable 
+                data={addAdjustments} 
+                columns={addColumns}
+                searchKey="referenceNumber"
+                searchPlaceholder="Search by reference number..."
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Transfer History */}
+        <div className="bg-white rounded-lg shadow-sm border">
+          <div className="p-6 border-b">
+            <h2 className="text-lg font-semibold text-gray-900">Transfer Stock History</h2>
+          </div>
+          <div className="p-6">
+            {transferAdjustments.length === 0 ? (
+              <p className="text-gray-500 text-center py-8">No transfer records found.</p>
+            ) : (
+              <DataTable 
+                data={transferAdjustments} 
+                columns={transferColumns}
+                searchKey="referenceNumber"
+                searchPlaceholder="Search by reference number..."
+              />
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

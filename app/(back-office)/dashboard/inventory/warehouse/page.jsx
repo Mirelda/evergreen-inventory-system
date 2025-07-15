@@ -87,7 +87,8 @@ function Warehouse() {
         if (response.ok) {
           setWarehouses(warehouses.filter(w => w.id !== warehouse.id));
         } else {
-          alert('Failed to delete warehouse');
+          const errorData = await response.json();
+          alert(errorData.message || 'Failed to delete warehouse');
         }
       } catch (error) {
         console.error('Error deleting warehouse:', error);
@@ -104,18 +105,31 @@ function Warehouse() {
   const handleBulkDelete = async (selectedIds) => {
     if (confirm(`Are you sure you want to delete ${selectedIds.length} warehouses?`)) {
       try {
-        const deletePromises = selectedIds.map(id => 
-          fetch(`/api/warehouse/${id}`, { method: 'DELETE' })
-        );
+        const deletePromises = selectedIds.map(async (id) => {
+          const response = await fetch(`/api/warehouse/${id}`, { method: 'DELETE' });
+          const data = await response.json();
+          return { response, data };
+        });
         
         const results = await Promise.all(deletePromises);
-        const successCount = results.filter(response => response.ok).length;
+        const successResults = results.filter(result => result.response.ok);
+        const errorResults = results.filter(result => !result.response.ok);
         
-        if (successCount > 0) {
-          setWarehouses(warehouses.filter(warehouse => !selectedIds.includes(warehouse.id)));
-          alert(`Successfully deleted ${successCount} warehouses`);
-        } else {
-          alert('Failed to delete warehouses');
+        if (successResults.length > 0) {
+          const deletedIds = successResults.map(result => {
+            // Extract ID from response URL
+            const url = result.response.url;
+            return url.split('/').pop();
+          });
+          setWarehouses(warehouses.filter(warehouse => !deletedIds.includes(warehouse.id)));
+          alert(`Successfully deleted ${successResults.length} warehouses`);
+        }
+        
+        if (errorResults.length > 0) {
+          const errorMessages = errorResults.map(result => result.data.message).filter(Boolean);
+          if (errorMessages.length > 0) {
+            alert(`Some warehouses could not be deleted:\n${errorMessages.join('\n')}`);
+          }
         }
       } catch (error) {
         console.error('Error bulk deleting warehouses:', error);
