@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 // GET - Fetch a single warehouse by ID
 export async function GET(request, { params }) {
   try {
-    const { id } = params;
+    const id = await params.id;
     
     const warehouse = await prisma.warehouse.findUnique({
       where: { id }
@@ -32,7 +32,7 @@ export async function GET(request, { params }) {
 // PUT - Update a warehouse
 export async function PUT(request, { params }) {
   try {
-    const { id } = params;
+    const id = await params.id;
     const { title, location, warehouseType, description } = await request.json();
 
     // Validate required fields
@@ -96,7 +96,7 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
-    const { id } = params;
+    const id = await params.id;
     
     const deletedWarehouse = await prisma.warehouse.delete({
       where: { id }

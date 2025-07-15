@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 // GET - Fetch a single unit by ID
 export async function GET(request, { params }) {
   try {
-    const { id } = params;
+    const id = await params.id;
     
     const unit = await prisma.unit.findUnique({
       where: { id }
@@ -32,8 +32,8 @@ export async function GET(request, { params }) {
 // PUT - Update a unit
 export async function PUT(request, { params }) {
   try {
-    const { id } = params;
-    const { title, shortName } = await request.json();
+    const id = await params.id;
+    const { title, abbreviation } = await request.json();
 
     // Validate required fields
     if (!title || title.trim() === '') {
@@ -43,9 +43,9 @@ export async function PUT(request, { params }) {
       );
     }
 
-    if (!shortName || shortName.trim() === '') {
+    if (!abbreviation || abbreviation.trim() === '') {
       return NextResponse.json(
-        { error: 'Short name is required' },
+        { error: 'Abbreviation is required' },
         { status: 400 }
       );
     }
@@ -67,7 +67,7 @@ export async function PUT(request, { params }) {
       where: { id },
       data: {
         title: title.trim(),
-        shortName: shortName.trim(),
+        abbreviation: abbreviation.trim(),
         updatedAt: new Date()
       }
     });
@@ -87,7 +87,7 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
-    const { id } = params;
+    const id = await params.id;
     
     const deletedUnit = await prisma.unit.delete({
       where: { id }

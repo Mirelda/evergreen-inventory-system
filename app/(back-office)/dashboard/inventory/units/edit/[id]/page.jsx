@@ -1,18 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import FormHeader from '@/components/dashboard/FormHeader';
 import TextInput from '@/components/formInputs/TextInput';
 import SubmitButton from '@/components/formInputs/SubmitButton';
 
-export default function EditUnitPage({ params }) {
+export default function EditUnitPage() {
   const router = useRouter();
-  const { id } = params;
+  const params = useParams();
+  const id = params.id;
   
   const [formData, setFormData] = useState({
     title: '',
-    shortName: ''
+    abbreviation: ''
   });
   
   const [errors, setErrors] = useState({});
@@ -30,7 +31,7 @@ export default function EditUnitPage({ params }) {
           setUnit(data);
           setFormData({
             title: data.title || '',
-            shortName: data.shortName || ''
+            abbreviation: data.abbreviation || ''
           });
         } else {
           console.error('Failed to fetch unit');
@@ -61,12 +62,12 @@ export default function EditUnitPage({ params }) {
       newErrors.title = 'Unit title must be less than 50 characters';
     }
 
-    if (!formData.shortName.trim()) {
-      newErrors.shortName = 'Short name is required';
-    } else if (formData.shortName.trim().length < 1) {
-      newErrors.shortName = 'Short name must be at least 1 character';
-    } else if (formData.shortName.trim().length > 10) {
-      newErrors.shortName = 'Short name must be less than 10 characters';
+    if (!formData.abbreviation.trim()) {
+      newErrors.abbreviation = 'Abbreviation is required';
+    } else if (formData.abbreviation.trim().length < 1) {
+      newErrors.abbreviation = 'Abbreviation must be at least 1 character';
+    } else if (formData.abbreviation.trim().length > 10) {
+      newErrors.abbreviation = 'Abbreviation must be less than 10 characters';
     }
 
     setErrors(newErrors);
@@ -95,6 +96,7 @@ export default function EditUnitPage({ params }) {
       if (response.ok) {
         const result = await response.json();
         console.log('Unit updated successfully:', result);
+        alert('Unit updated successfully!');
         router.push('/dashboard/inventory/units');
       } else {
         const errorData = await response.json();
@@ -155,8 +157,7 @@ export default function EditUnitPage({ params }) {
       <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <FormHeader 
           title="Edit Unit" 
-          subtitle="Update unit information"
-          backUrl="/dashboard/inventory/units"
+          href="/dashboard/inventory/units"
         />
         
         <div className="mt-8 bg-white shadow rounded-lg">
@@ -172,13 +173,13 @@ export default function EditUnitPage({ params }) {
                 required
               />
               <TextInput
-                label="Short Name"
-                name="shortName"
-                value={formData.shortName}
-                onChange={(value) => handleInputChange('shortName', value)}
-                error={errors.shortName}
-                placeholder="Enter short name (e.g., pcs, kg)"
-                required
+                label="Abbreviation"
+                name="abbreviation"
+                value={formData.abbreviation}
+                onChange={(value) => handleInputChange('abbreviation', value)}
+                error={errors.abbreviation}
+                placeholder="Enter abbreviation (e.g., pcs, kg)"
+                isRequired={true}
               />
             </div>
 

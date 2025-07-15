@@ -5,9 +5,11 @@ const prisma = new PrismaClient();
 
 export async function GET(request, { params }) {
   try {
+    const id = await params.id;
+    
     const category = await prisma.category.findUnique({
       where: {
-        id: params.id,
+        id: id,
       },
       include: {
         items: true,
@@ -42,11 +44,12 @@ export async function GET(request, { params }) {
 
 export async function PUT(request, { params }) {
   try {
+    const id = await params.id;
     const data = await request.json();
 
     const updatedCategory = await prisma.category.update({
       where: {
-        id: params.id,
+        id: id,
       },
       data: {
         title: data.title,
@@ -75,9 +78,11 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
+    const id = await params.id;
+    
     const deletedCategory = await prisma.category.delete({
       where: {
-        id: params.id,
+        id: id,
       },
     });
 

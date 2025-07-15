@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 // GET - Fetch a single brand by ID
 export async function GET(request, { params }) {
   try {
-    const { id } = params;
+    const id = await params.id;
     
     const brand = await prisma.brand.findUnique({
       where: { id }
@@ -32,7 +32,7 @@ export async function GET(request, { params }) {
 // PUT - Update a brand
 export async function PUT(request, { params }) {
   try {
-    const { id } = params;
+    const id = await params.id;
     const { title } = await request.json();
 
     // Validate required fields
@@ -79,7 +79,7 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
-    const { id } = params;
+    const id = await params.id;
     
     const deletedBrand = await prisma.brand.delete({
       where: { id }
