@@ -18,9 +18,10 @@ export async function GET() {
             title: true
           }
         },
-        warehouse: {
+        unit: {
           select: {
-            title: true
+            title: true,
+            abbreviation: true
           }
         }
       }
@@ -37,121 +38,57 @@ export async function GET() {
     }, 0);
 
     // Calculate profit margin
-    const profitMargin = totalInventoryValue > 0 ? 
-      ((totalInventoryValue - totalCostValue) / totalInventoryValue) * 100 : 0;
+    const profitMargin = totalInventoryValue > 0 ? ((totalInventoryValue - totalCostValue) / totalInventoryValue) * 100 : 0;
 
-    // Group by category
-    const categoryValue = items.reduce((acc, item) => {
+    // Group by category for breakdown
+    const categoryBreakdown = items.reduce((acc, item) => {
       const categoryName = item.category?.title || 'Unknown';
       const itemValue = item.quantity * (item.sellingPrice || 0);
       
       if (!acc[categoryName]) {
-        acc[categoryName] = {
-          totalValue: 0,
-          itemCount: 0,
-          items: []
-        };
+        acc[categoryName] = 0;
       }
-      
-      acc[categoryName].totalValue += itemValue;
-      acc[categoryName].itemCount += 1;
-      acc[categoryName].items.push({
-        id: item.id,
-        title: item.title,
-        quantity: item.quantity,
-        value: itemValue,
-        sellingPrice: item.sellingPrice
-      });
+      acc[categoryName] += itemValue;
       
       return acc;
     }, {});
 
-    // Convert to array for chart data
-    const categoryChartData = Object.entries(categoryValue).map(([category, data]) => ({
-      label: category,
-      value: data.totalValue,
-      itemCount: data.itemCount
+    const categoryData = Object.entries(categoryBreakdown).map(([category, value]) => ({
+      category,
+      value: Math.round(value * 100) / 100
     }));
 
-    // Group by warehouse
-    const warehouseValue = items.reduce((acc, item) => {
-      const warehouseName = item.warehouse?.title || 'Unknown';
+    // Group by brand for breakdown
+    const brandBreakdown = items.reduce((acc, item) => {
+      const brandName = item.brand?.title || 'Unknown';
       const itemValue = item.quantity * (item.sellingPrice || 0);
       
-      if (!acc[warehouseName]) {
-        acc[warehouseName] = {
-          totalValue: 0,
-          itemCount: 0
-        };
+      if (!acc[brandName]) {
+        acc[brandName] = 0;
       }
-      
-      acc[warehouseName].totalValue += itemValue;
-      acc[warehouseName].itemCount += 1;
+      acc[brandName] += itemValue;
       
       return acc;
     }, {});
 
-    const warehouseChartData = Object.entries(warehouseValue).map(([warehouse, data]) => ({
-      label: warehouse,
-      value: data.totalValue,
-      itemCount: data.itemCount
+    const brandData = Object.entries(brandBreakdown).map(([brand, value]) => ({
+      brand,
+      value: Math.round(value * 100) / 100
     }));
 
-    // Get top 10 most valuable items
-    const topValuableItems = items
-      .map(item => ({
-        id: item.id,
-        title: item.title,
-        category: item.category?.title,
-        brand: item.brand?.title,
-        quantity: item.quantity,
-        sellingPrice: item.sellingPrice,
-        totalValue: item.quantity * (item.sellingPrice || 0)
-      }))
-      .sort((a, b) => b.totalValue - a.totalValue)
-      .slice(0, 10);
-
-    // Get items with highest quantity
-    const topQuantityItems = items
-      .map(item => ({
-        id: item.id,
-        title: item.title,
-        category: item.category?.title,
-        quantity: item.quantity,
-        sellingPrice: item.sellingPrice,
-        totalValue: item.quantity * (item.sellingPrice || 0)
-      }))
-      .sort((a, b) => b.quantity - a.quantity)
-      .slice(0, 10);
-
     const response = {
-      summary: {
-        totalInventoryValue,
-        totalCostValue,
-        profitMargin: Math.round(profitMargin * 100) / 100,
-        totalItems: items.length,
-        averageItemValue: totalInventoryValue / items.length || 0
-      },
-      charts: {
-        categoryBreakdown: categoryChartData,
-        warehouseBreakdown: warehouseChartData
-      },
-      topItems: {
-        mostValuable: topValuableItems,
-        highestQuantity: topQuantityItems
-      },
-      detailedData: {
-        categoryValue,
-        warehouseValue
-      }
+      totalInventoryValue: Math.round(totalInventoryValue * 100) / 100,
+      totalCostValue: Math.round(totalCostValue * 100) / 100,
+      profitMargin: Math.round(profitMargin * 100) / 100,
+      totalItems: items.length,
+      categoryBreakdown: categoryData,
+      brandBreakdown: brandData,
+      averageItemValue: items.length > 0 ? Math.round((totalInventoryValue / items.length) * 100) / 100 : 0
     };
 
     return NextResponse.json(response);
   } catch (error) {
     console.error('Error fetching inventory value analytics:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch inventory value data.' }, { status: 500 });
   }
 } 

@@ -5,13 +5,8 @@ const prisma = new PrismaClient();
 
 export async function GET() {
   try {
-    // Get items with quantity below reorder point
-    const lowStockItems = await prisma.item.findMany({
-      where: {
-        quantity: {
-          lte: prisma.item.fields.reorderPoint
-        }
-      },
+    // Get all items first, then filter in JavaScript
+    const allItems = await prisma.item.findMany({
       include: {
         category: {
           select: {
@@ -28,99 +23,18 @@ export async function GET() {
             title: true,
             abbreviation: true
           }
-        },
-        warehouse: {
-          select: {
-            title: true
-          }
         }
-      },
-      orderBy: {
-        quantity: 'asc'
       }
     });
 
-    // Get out of stock items
-    const outOfStockItems = await prisma.item.findMany({
-      where: {
-        quantity: 0
-      },
-      include: {
-        category: {
-          select: {
-            title: true
-          }
-        },
-        brand: {
-          select: {
-            title: true
-          }
-        },
-        unit: {
-          select: {
-            title: true,
-            abbreviation: true
-          }
-        },
-        warehouse: {
-          select: {
-            title: true
-          }
-        }
-      },
-      orderBy: {
-        updatedAt: 'desc'
-      }
-    });
+    // Filter items with quantity below reorder point
+    const lowStockItems = allItems.filter(item => 
+      item.reorderPoint && item.quantity <= item.reorderPoint
+    ).sort((a, b) => a.quantity - b.quantity);
 
-    // Calculate summary statistics
-    const summary = {
-      lowStockCount: lowStockItems.length,
-      outOfStockCount: outOfStockItems.length,
-      totalAlerts: lowStockItems.length + outOfStockItems.length,
-      criticalItems: lowStockItems.filter(item => item.quantity === 0).length,
-      warningItems: lowStockItems.filter(item => item.quantity > 0).length
-    };
-
-    // Group by category for chart data
-    const categoryStats = await prisma.item.groupBy({
-      by: ['categoryId'],
-      where: {
-        quantity: {
-          lte: prisma.item.fields.reorderPoint
-        }
-      },
-      _count: {
-        id: true
-      }
-    });
-
-    const categoryData = await Promise.all(
-      categoryStats.map(async (stat) => {
-        const category = await prisma.category.findUnique({
-          where: { id: stat.categoryId },
-          select: { title: true }
-        });
-        return {
-          label: category?.title || 'Unknown',
-          value: stat._count.id
-        };
-      })
-    );
-
-    const response = {
-      summary,
-      lowStockItems,
-      outOfStockItems,
-      categoryBreakdown: categoryData
-    };
-
-    return NextResponse.json(response);
+    return NextResponse.json(lowStockItems);
   } catch (error) {
     console.error('Error fetching low stock analytics:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch low stock data.' }, { status: 500 });
   }
 } 
