@@ -54,39 +54,39 @@ function Sidebar({ showSidebar, setShowSidebar, collapsed, setCollapsed }) {
   const salesLinks = [
     {
       title: "Customers",
-      href: "#",
+      href: "/dashboard/coming-soon",
     },
     {
       title: "Sales Orders",
-      href: "#",
+      href: "/dashboard/coming-soon",
     },
     {
       title: "Packages",
-      href: "#",
+      href: "/dashboard/coming-soon",
     },
     {
       title: "Shipments",
-      href: "#",
+      href: "/dashboard/coming-soon",
     },
     {
       title: "Invoices",
-      href: "#",
+      href: "/dashboard/coming-soon",
     },
     {
       title: "Sales Receipts",
-      href: "#",
+      href: "/dashboard/coming-soon",
     },
     {
       title: "Payment Received",
-      href: "#",
+      href: "/dashboard/coming-soon",
     },
     {
       title: "Sales Returns",
-      href: "#",
+      href: "/dashboard/coming-soon",
     },
     {
       title: "Credit Notes",
-      href: "#",
+      href: "/dashboard/coming-soon",
     },
   ];
 
@@ -102,7 +102,7 @@ function Sidebar({ showSidebar, setShowSidebar, collapsed, setCollapsed }) {
       <div className="bg-slate-950 flex items-center justify-between py-3 px-2">
         <span className="flex items-center font-semibold text-xl">
           <Store className="w-6 h-6 mr-2" />
-          {!collapsed && 'Inventory'}
+          {!collapsed && 'Evergreen'}
         </span>
         <button
           onClick={() => setShowSidebar(false)}
@@ -116,7 +116,7 @@ function Sidebar({ showSidebar, setShowSidebar, collapsed, setCollapsed }) {
           className={`flex items-center rounded-md transition-all h-12 w-full
             ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}
             bg-blue-600 text-slate-50`}
-          href="/dashboard/home"
+          href="/dashboard/home/overview"
           onClick={handleMobileClose}
         >
           <Home className="w-5 h-5" />
@@ -129,17 +129,22 @@ function Sidebar({ showSidebar, setShowSidebar, collapsed, setCollapsed }) {
           onLinkClick={handleMobileClose}
           collapsed={collapsed}
         />
-        <SidebarDropdownLink
-          title={!collapsed ? "Sales" : ""}
-          items={salesLinks}
-          icon={ShoppingBasket}
-          onLinkClick={handleMobileClose}
-          collapsed={collapsed}
-        />
-        <button className={`flex items-center rounded-md transition-all h-12 w-full ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`}>
+        <Link
+          className={`flex items-center rounded-md transition-all h-12 w-full ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'} hover:bg-slate-700`}
+          href="/dashboard/coming-soon"
+          onClick={handleMobileClose}
+        >
+          <ShoppingBasket className="w-4 h-4" />
+          {!collapsed && <span>Sales</span>}
+        </Link>
+        <Link
+          className={`flex items-center rounded-md transition-all h-12 w-full ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'} hover:bg-slate-700`}
+          href="/dashboard/coming-soon"
+          onClick={handleMobileClose}
+        >
           <ShoppingBag className="w-4 h-4" />
           {!collapsed && <span>Purchases</span>}
-        </button>
+        </Link>
         <Link className={`flex items-center rounded-md transition-all h-12 w-full ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`} href="#" onClick={handleMobileClose}>
           <Cable className="w-4 h-4" />
           {!collapsed && <span>Integrations</span>}
