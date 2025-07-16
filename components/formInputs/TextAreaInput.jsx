@@ -78,6 +78,18 @@ function TextAreaInput({
   }
 
   // If no register, use normal textarea
+  const handleChange = (e) => {
+    // Event object kontrolü
+    if (!e || !e.target) {
+      console.error('TextAreaInput: Invalid event object:', e);
+      return;
+    }
+
+    if (onChange) {
+      onChange(e);
+    }
+  };
+
   return (
     <div className={className}>
       <label
@@ -93,7 +105,7 @@ function TextAreaInput({
           id={name}
           rows={rows}
           value={value || ''}
-          onChange={(e) => onChange && onChange(e.target.value)}
+          onChange={handleChange}
           className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 ${
             error 
               ? 'ring-red-300 focus:ring-red-500' 

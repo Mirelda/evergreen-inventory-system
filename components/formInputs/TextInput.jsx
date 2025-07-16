@@ -84,6 +84,18 @@ function TextInput({
   }
 
   // If no register, use normal input
+  const handleChange = (e) => {
+    // Event object kontrolü
+    if (!e || !e.target) {
+      console.error('TextInput: Invalid event object:', e);
+      return;
+    }
+
+    if (onChange) {
+      onChange(e);
+    }
+  };
+
   return (
     <div className={className}>
       <label
@@ -99,7 +111,7 @@ function TextInput({
           name={name}
           id={name}
           value={value || ''}
-          onChange={(e) => onChange && onChange(e.target.value)}
+          onChange={handleChange}
           autoComplete={name}
           className={`block w-full rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 ${
             error 

@@ -45,6 +45,9 @@ function Sidebar({ showSidebar, setShowSidebar, collapsed, setCollapsed }) {
       title: "Warehouse",
       href: "/dashboard/inventory/warehouse",
     },
+  ];
+
+  const integrationsLinks = [
     {
       title: "Inventory Adjustments",
       href: "/dashboard/inventory/adjustments",
@@ -145,10 +148,13 @@ function Sidebar({ showSidebar, setShowSidebar, collapsed, setCollapsed }) {
           <ShoppingBag className="w-4 h-4" />
           {!collapsed && <span>Purchases</span>}
         </Link>
-        <Link className={`flex items-center rounded-md transition-all h-12 w-full ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`} href="#" onClick={handleMobileClose}>
-          <Cable className="w-4 h-4" />
-          {!collapsed && <span>Integrations</span>}
-        </Link>
+        <SidebarDropdownLink
+          title={!collapsed ? "Integrations" : ""}
+          items={integrationsLinks}
+          icon={Cable}
+          onLinkClick={handleMobileClose}
+          collapsed={collapsed}
+        />
         <Link className={`flex items-center rounded-md transition-all h-12 w-full ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`} href="#" onClick={handleMobileClose}>
           <BarChart4 className="w-4 h-4" />
           {!collapsed && <span>Reports</span>}

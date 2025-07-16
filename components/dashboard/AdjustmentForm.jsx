@@ -17,33 +17,66 @@ export default function AdjustmentForm({ type = "add", items = [], warehouses = 
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    // Event object kontrolü
+    if (!e || !e.target) {
+      console.error('Invalid event object:', e);
+      return;
+    }
+
+    const { name, value } = e.target;
+    console.log('AdjustmentForm handleChange:', name, value); // Debug için
+    
+    setForm(prev => {
+      const newForm = {
+        ...prev,
+        [name]: value
+      };
+      console.log('New form state:', newForm); // Debug için
+      return newForm;
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('Form submitted with data:', form); // Debug için
     setLoading(true);
+
     try {
-      let endpoint = type === "add" ? "/api/adjustments/add" : "/api/adjustments/transfer";
-      let payload = {
-        itemId: form.itemId,
-        referenceNumber: form.referenceNumber,
-        notes: form.notes,
-      };
+      const endpoint = type === "add" ? "/api/adjustments/add" : "/api/adjustments/transfer";
+      
+      // Prepare data based on type
+      let requestData;
       if (type === "add") {
-        payload.warehouseId = form.warehouseId;
-        payload.addStockQuantity = form.quantity;
+        requestData = {
+          itemId: form.itemId,
+          warehouseId: form.warehouseId,
+          addStockQuantity: form.quantity, // API'de beklenen field name
+          referenceNumber: form.referenceNumber,
+          notes: form.notes,
+        };
       } else {
-        payload.givingWarehouseId = form.givingWarehouseId;
-        payload.receivingWarehouseId = form.receivingWarehouseId;
-        payload.transferStockQuantity = form.quantity;
+        requestData = {
+          itemId: form.itemId,
+          givingWarehouseId: form.givingWarehouseId,
+          receivingWarehouseId: form.receivingWarehouseId,
+          transferStockQuantity: form.quantity, // API'de beklenen field name
+          referenceNumber: form.referenceNumber,
+          notes: form.notes,
+        };
       }
-      const res = await fetch(endpoint, {
+
+      console.log('Sending data to API:', requestData); // Debug için
+
+      const response = await fetch(endpoint, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestData),
       });
-      if (res.ok) {
+
+      if (response.ok) {
+        console.log('Form submitted successfully'); // Debug için
         setForm({
           itemId: "",
           warehouseId: "",
@@ -54,51 +87,54 @@ export default function AdjustmentForm({ type = "add", items = [], warehouses = 
           notes: "",
         });
         if (onSuccess) onSuccess();
-        alert("Operation successful!");
       } else {
-        const data = await res.json();
-        alert(data.error || "An error occurred");
+        const errorData = await response.json();
+        console.error("Failed to submit adjustment:", errorData);
       }
-    } catch (err) {
-      alert("An error occurred");
+    } catch (error) {
+      console.error("Error submitting adjustment:", error);
     } finally {
       setLoading(false);
     }
   };
 
+  const itemOptions = items.map(item => ({
+    value: item.id,
+    label: item.title
+  }));
+
+  const warehouseOptions = warehouses.map(warehouse => ({
+    value: warehouse.id,
+    label: warehouse.title || warehouse.name // API'den gelen field name'i kontrol et
+  }));
+
+  console.log('Current form state:', form); // Debug için
+  console.log('Item options:', itemOptions); // Debug için
+  console.log('Warehouse options:', warehouseOptions); // Debug için
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Item Selection */}
-        <div className="md:col-span-2">
-          <SelectInput
-            label="Item"
-            name="itemId"
-            value={form.itemId}
-            onChange={handleChange}
-            required
-            options={[
-              { value: "", label: "Select an item" },
-              ...items.map((item) => ({ value: item.id, label: item.title }))
-            ]}
-          />
-        </div>
+      <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+        <SelectInput
+          label="Item"
+          name="itemId"
+          value={form.itemId}
+          onChange={handleChange}
+          options={itemOptions}
+          isRequired={true}
+          placeholder="Select Item"
+        />
 
-        {/* Warehouse Selection */}
         {type === "add" ? (
-          <div className="md:col-span-2">
-            <SelectInput
-              label="Warehouse"
-              name="warehouseId"
-              value={form.warehouseId}
-              onChange={handleChange}
-              required
-              options={[
-                { value: "", label: "Select a warehouse" },
-                ...warehouses.map((w) => ({ value: w.id, label: w.title }))
-              ]}
-            />
-          </div>
+          <SelectInput
+            label="Warehouse"
+            name="warehouseId"
+            value={form.warehouseId}
+            onChange={handleChange}
+            options={warehouseOptions}
+            isRequired={true}
+            placeholder="Select Warehouse"
+          />
         ) : (
           <>
             <SelectInput
@@ -106,66 +142,51 @@ export default function AdjustmentForm({ type = "add", items = [], warehouses = 
               name="givingWarehouseId"
               value={form.givingWarehouseId}
               onChange={handleChange}
-              required
-              options={[
-                { value: "", label: "Select source warehouse" },
-                ...warehouses.map((w) => ({ value: w.id, label: w.title }))
-              ]}
+              options={warehouseOptions}
+              isRequired={true}
+              placeholder="Select From Warehouse"
             />
             <SelectInput
               label="To Warehouse"
               name="receivingWarehouseId"
               value={form.receivingWarehouseId}
               onChange={handleChange}
-              required
-              options={[
-                { value: "", label: "Select destination warehouse" },
-                ...warehouses.map((w) => ({ value: w.id, label: w.title }))
-              ]}
+              options={warehouseOptions}
+              isRequired={true}
+              placeholder="Select To Warehouse"
             />
           </>
         )}
 
-        {/* Quantity and Reference Number */}
         <TextInput
           label="Quantity"
           name="quantity"
-          type="number"
           value={form.quantity}
           onChange={handleChange}
-          required
-          min={1}
+          isRequired={true}
           placeholder="Enter quantity"
         />
+
         <TextInput
           label="Reference Number"
           name="referenceNumber"
-          type="text"
           value={form.referenceNumber}
           onChange={handleChange}
-          required
+          isRequired={true}
           placeholder="Enter reference number"
         />
-      </div>
 
-      {/* Notes */}
-      <TextAreaInput
-        label="Notes"
-        name="notes"
-        value={form.notes}
-        onChange={handleChange}
-        placeholder="Enter any additional notes..."
-        rows={3}
-      />
-
-      {/* Submit Button */}
-      <div className="flex justify-end">
-        <SubmitButton
-          loading={loading}
-          text={type === "add" ? "Add Stock" : "Transfer Stock"}
-          loadingText="Processing..."
+        <TextAreaInput
+          label="Notes"
+          name="notes"
+          value={form.notes}
+          onChange={handleChange}
+          isRequired={false}
+          placeholder="Enter any additional notes..."
         />
       </div>
+
+      <SubmitButton loading={loading} text={type === "add" ? "Add Stock" : "Transfer Stock"} />
     </form>
   );
 } 

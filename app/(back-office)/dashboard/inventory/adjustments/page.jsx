@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import AdjustmentForm from "@/components/dashboard/AdjustmentForm";
-import DataTable from "@/components/ui/DataTable";
+import DataTable from "@/components/dashboard/DataTable";
 
 export default function AdjustmentsPage() {
   const [items, setItems] = useState([]);
