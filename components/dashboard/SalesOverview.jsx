@@ -39,11 +39,11 @@ function SalesOverview() {
     },
   ];
   return (
-    <div className="bg-blue-50 border-b border-slate-300  grid grid-cols-12 gap-4">
+    <div className="bg-blue-50 border-b border-slate-300 grid grid-cols-1 lg:grid-cols-12 gap-4">
       {/* sales activity */}
-      <div className="p-8 col-span-8 border-r border-slate-300">
-        <h2 className="mb-6 text-xl">Sales Activity</h2>
-        <div className="pr-8 grid grid-cols-4 gap-4">
+      <div className="p-4 lg:p-8 lg:col-span-8 lg:border-r border-slate-300">
+        <h2 className="mb-4 lg:mb-6 text-lg lg:text-xl">Sales Activity</h2>
+        <div className="lg:pr-8 grid grid-cols-2 md:grid-cols-4 gap-3 lg:gap-4">
           {/* card */}
           {salesActivity.map((item, i) => {
             return <SalesActivityCard item={item} key={i} />;
@@ -51,8 +51,8 @@ function SalesOverview() {
         </div>
       </div>
       {/* inventory summary */}
-      <div className="col-span-4 p-8">
-        <h2 className="mb-6 text-xl">Inventory Summary</h2>
+      <div className="lg:col-span-4 p-4 lg:p-8">
+        <h2 className="mb-4 lg:mb-6 text-lg lg:text-xl">Inventory Summary</h2>
         <div className="">
           {inventorySummary.map((item, i) => {
             return <InventorySummaryCard item={item} key={i} />;

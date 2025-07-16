@@ -1,154 +1,54 @@
-import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import db from "@/lib/db";
+import { NextResponse } from "next/server";
 
-const prisma = new PrismaClient();
-
-// GET - Fetch a single warehouse by ID
-export async function GET(request, { params }) {
+export async function GET(request, { params: { id } }) {
   try {
-    const id = await params.id;
-    
-    const warehouse = await prisma.warehouse.findUnique({
-      where: { id }
+    const warehouse = await db.warehouse.findUnique({
+      where: {
+        id,
+      },
     });
-
-    if (!warehouse) {
-      return NextResponse.json(
-        { error: 'Warehouse not found' },
-        { status: 404 }
-      );
-    }
-
     return NextResponse.json(warehouse);
   } catch (error) {
-    console.error('Error fetching warehouse:', error);
+    console.log(error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      {
+        error,
+        message: "Failed to Fetch the warehouse",
+      },
+      {
+        status: 500,
+      }
     );
   }
 }
 
-// PUT - Update a warehouse
-export async function PUT(request, { params }) {
+export async function PUT(request, { params: { id } }) {
   try {
-    const id = await params.id;
-    const { title, location, warehouseType, description } = await request.json();
-
-    // Validate required fields
-    if (!title || title.trim() === '') {
-      return NextResponse.json(
-        { error: 'Title is required' },
-        { status: 400 }
-      );
-    }
-
-    if (!location || location.trim() === '') {
-      return NextResponse.json(
-        { error: 'Location is required' },
-        { status: 400 }
-      );
-    }
-
-    if (!warehouseType || warehouseType.trim() === '') {
-      return NextResponse.json(
-        { error: 'Warehouse type is required' },
-        { status: 400 }
-      );
-    }
-
-    // Check if warehouse exists
-    const existingWarehouse = await prisma.warehouse.findUnique({
-      where: { id }
-    });
-
-    if (!existingWarehouse) {
-      return NextResponse.json(
-        { error: 'Warehouse not found' },
-        { status: 404 }
-      );
-    }
-
-    // Update warehouse
-    const updatedWarehouse = await prisma.warehouse.update({
-      where: { id },
+    const { title, location, type, description } = await request.json();
+    const warehouse = await db.warehouse.update({
+      where: {
+        id,
+      },
       data: {
-        title: title.trim(),
-        location: location.trim(),
-        warehouseType: warehouseType.trim(),
-        description: description?.trim() || '',
-        updatedAt: new Date()
-      }
+        title,
+        location,
+        description,
+        warehouseType: type,
+      },
     });
-
-    return NextResponse.json({
-      message: 'Warehouse updated successfully',
-      warehouse: updatedWarehouse
-    });
+    console.log(warehouse);
+    return NextResponse.json(warehouse);
   } catch (error) {
-    console.error('Error updating warehouse:', error);
+    console.log(error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      {
+        error,
+        message: "Failed to Update the warehouse",
+      },
+      {
+        status: 500,
+      }
     );
   }
 }
-
-export async function DELETE(request, { params }) {
-  try {
-    const id = await params.id;
-    
-    // Check if warehouse exists
-    const warehouse = await prisma.warehouse.findUnique({
-      where: { id },
-      include: {
-        addStockAdjustments: true
-      }
-    });
-
-    if (!warehouse) {
-      return NextResponse.json(
-        { error: 'Warehouse not found' },
-        { status: 404 }
-      );
-    }
-
-    // Check if warehouse has related stock adjustments
-    if (warehouse.addStockAdjustments.length > 0) {
-      return NextResponse.json(
-        { 
-          error: 'Cannot delete warehouse',
-          message: 'This warehouse has associated stock adjustments and cannot be deleted. Please remove all related stock adjustments first.'
-        },
-        { status: 400 }
-      );
-    }
-
-    const deletedWarehouse = await prisma.warehouse.delete({
-      where: { id }
-    });
-
-    return NextResponse.json({
-      message: 'Warehouse deleted successfully',
-      warehouse: deletedWarehouse
-    });
-  } catch (error) {
-    console.error('Error deleting warehouse:', error);
-    
-    // Check if it's a Prisma relation error
-    if (error.code === 'P2014') {
-      return NextResponse.json(
-        { 
-          error: 'Cannot delete warehouse',
-          message: 'This warehouse has associated stock adjustments and cannot be deleted. Please remove all related stock adjustments first.'
-        },
-        { status: 400 }
-      );
-    }
-    
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
-} 

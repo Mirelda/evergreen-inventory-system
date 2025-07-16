@@ -58,9 +58,9 @@ function Dashboard() {
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 lg:space-y-6 p-4 lg:p-6">
       {/* Top Analytics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         <AnalyticsCard
           title="Total Items"
           value={analyticsData.overview?.totalItems || 0}
@@ -92,7 +92,7 @@ function Dashboard() {
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         <ChartCard title="Inventory Value by Category">
           <PieChart 
             data={(analyticsData.inventoryValue?.categoryBreakdown || []).map(item => ({
@@ -116,7 +116,7 @@ function Dashboard() {
       {analyticsData.lowStock && analyticsData.lowStock.length > 0 && (
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold mb-4 text-red-600">⚠️ Low Stock Alerts</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
             {analyticsData.lowStock.slice(0, 6).map((item, index) => (
               <div key={index} className="border border-red-200 rounded-lg p-4 bg-red-50">
                 <h4 className="font-medium text-red-800">{item.title}</h4>

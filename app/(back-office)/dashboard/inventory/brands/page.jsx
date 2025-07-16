@@ -157,6 +157,8 @@ function Brands() {
         onBulkExport={handleBulkExport}
         enableAdvancedFiltering={true}
         filters={filters}
+        endpoint="brands"
+        resourceTitle="brand"
       />
     </div>
   );

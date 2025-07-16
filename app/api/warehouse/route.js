@@ -1,26 +1,26 @@
+import db from "@/lib/db";
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
-
-export async function GET() {
+export async function POST(request) {
   try {
-    const warehouses = await prisma.warehouse.findMany({
-      include: {
-        addStockAdjustments: true,
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
+    const { title, location, type, description } = await request.json();
 
-    return NextResponse.json(warehouses);
+    const warehouse = await db.warehouse.create({
+      data: {
+        title,
+        location,
+        description,
+        warehouseType: type,
+      },
+    });
+    console.log(warehouse);
+    return NextResponse.json(warehouse);
   } catch (error) {
     console.log(error);
     return NextResponse.json(
       {
         error,
-        message: "Failed to fetch warehouses",
+        message: "Failed to create a warehouse",
       },
       {
         status: 500,
@@ -29,31 +29,46 @@ export async function GET() {
   }
 }
 
-export async function POST(request) {
+export async function GET(request) {
   try {
-    const { title, location, warehouseType, description } = await request.json();
-
-    // Save warehouse to database
-    const warehouse = await prisma.warehouse.create({
-      data: {
-        title,
-        location,
-        warehouseType,
-        description,
+    const warehouse = await db.warehouse.findMany({
+      orderBy: {
+        createdAt: "desc", //Latest warehouse
       },
       include: {
-        addStockAdjustments: true,
+        warehouseItems: true,
       },
     });
-
-    console.log("Warehouse created:", warehouse);
     return NextResponse.json(warehouse);
   } catch (error) {
     console.log(error);
     return NextResponse.json(
       {
         error,
-        message: "Failed to create a warehouse",
+        message: "Failed to Fetch the warehouse",
+      },
+      {
+        status: 500,
+      }
+    );
+  }
+}
+
+export async function DELETE(request) {
+  try {
+    const id = request.nextUrl.searchParams.get("id");
+    const deletedWarehouse = await db.warehouse.delete({
+      where: {
+        id,
+      },
+    });
+    return NextResponse.json(deletedWarehouse);
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json(
+      {
+        error,
+        message: "Failed to Delete Warehouse",
       },
       {
         status: 500,

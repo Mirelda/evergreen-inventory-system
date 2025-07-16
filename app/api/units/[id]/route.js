@@ -1,109 +1,52 @@
-import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import db from "@/lib/db";
+import { NextResponse } from "next/server";
 
-const prisma = new PrismaClient();
-
-// GET - Fetch a single unit by ID
-export async function GET(request, { params }) {
+export async function GET(request, { params: { id } }) {
   try {
-    const id = await params.id;
-    
-    const unit = await prisma.unit.findUnique({
-      where: { id }
+    const unit = await db.unit.findUnique({
+      where: {
+        id,
+      },
     });
-
-    if (!unit) {
-      return NextResponse.json(
-        { error: 'Unit not found' },
-        { status: 404 }
-      );
-    }
-
     return NextResponse.json(unit);
   } catch (error) {
-    console.error('Error fetching unit:', error);
+    console.log(error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
-}
-
-// PUT - Update a unit
-export async function PUT(request, { params }) {
-  try {
-    const id = await params.id;
-    const { title, abbreviation } = await request.json();
-
-    // Validate required fields
-    if (!title || title.trim() === '') {
-      return NextResponse.json(
-        { error: 'Title is required' },
-        { status: 400 }
-      );
-    }
-
-    if (!abbreviation || abbreviation.trim() === '') {
-      return NextResponse.json(
-        { error: 'Abbreviation is required' },
-        { status: 400 }
-      );
-    }
-
-    // Check if unit exists
-    const existingUnit = await prisma.unit.findUnique({
-      where: { id }
-    });
-
-    if (!existingUnit) {
-      return NextResponse.json(
-        { error: 'Unit not found' },
-        { status: 404 }
-      );
-    }
-
-    // Update unit
-    const updatedUnit = await prisma.unit.update({
-      where: { id },
-      data: {
-        title: title.trim(),
-        abbreviation: abbreviation.trim(),
-        updatedAt: new Date()
+      {
+        error,
+        message: "Failed to Fetch the Unit",
+      },
+      {
+        status: 500,
       }
-    });
-
-    return NextResponse.json({
-      message: 'Unit updated successfully',
-      unit: updatedUnit
-    });
-  } catch (error) {
-    console.error('Error updating unit:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
     );
   }
 }
 
-export async function DELETE(request, { params }) {
+export async function PUT(request, { params: { id } }) {
   try {
-    const id = await params.id;
-    
-    const deletedUnit = await prisma.unit.delete({
-      where: { id }
+    const { title, abbreviation } = await request.json();
+    const unit = await db.unit.update({
+      where: {
+        id,
+      },
+      data: {
+        title,
+        abbreviation,
+      },
     });
-
-    return NextResponse.json({
-      message: 'Unit deleted successfully',
-      unit: deletedUnit
-    });
+    console.log(unit);
+    return NextResponse.json(unit);
   } catch (error) {
-    console.error('Error deleting unit:', error);
+    console.log(error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      {
+        error,
+        message: "Failed to Update the unit",
+      },
+      {
+        status: 500,
+      }
     );
   }
 }
-
- 

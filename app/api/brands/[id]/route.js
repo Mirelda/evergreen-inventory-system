@@ -1,101 +1,51 @@
-import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import db from "@/lib/db";
+import { NextResponse } from "next/server";
 
-const prisma = new PrismaClient();
-
-// GET - Fetch a single brand by ID
-export async function GET(request, { params }) {
+export async function GET(request, { params: { id } }) {
   try {
-    const id = await params.id;
-    
-    const brand = await prisma.brand.findUnique({
-      where: { id }
+    const brand = await db.brand.findUnique({
+      where: {
+        id,
+      },
     });
-
-    if (!brand) {
-      return NextResponse.json(
-        { error: 'Brand not found' },
-        { status: 404 }
-      );
-    }
-
     return NextResponse.json(brand);
   } catch (error) {
-    console.error('Error fetching brand:', error);
+    console.log(error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
-}
-
-// PUT - Update a brand
-export async function PUT(request, { params }) {
-  try {
-    const id = await params.id;
-    const { title } = await request.json();
-
-    // Validate required fields
-    if (!title || title.trim() === '') {
-      return NextResponse.json(
-        { error: 'Title is required' },
-        { status: 400 }
-      );
-    }
-
-    // Check if brand exists
-    const existingBrand = await prisma.brand.findUnique({
-      where: { id }
-    });
-
-    if (!existingBrand) {
-      return NextResponse.json(
-        { error: 'Brand not found' },
-        { status: 404 }
-      );
-    }
-
-    // Update brand
-    const updatedBrand = await prisma.brand.update({
-      where: { id },
-      data: {
-        title: title.trim(),
-        updatedAt: new Date()
+      {
+        error,
+        message: "Failed to Fetch the brand",
+      },
+      {
+        status: 500,
       }
-    });
-
-    return NextResponse.json({
-      message: 'Brand updated successfully',
-      brand: updatedBrand
-    });
-  } catch (error) {
-    console.error('Error updating brand:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
     );
   }
 }
 
-export async function DELETE(request, { params }) {
+export async function PUT(request, { params: { id } }) {
   try {
-    const id = await params.id;
-    
-    const deletedBrand = await prisma.brand.delete({
-      where: { id }
+    const { title } = await request.json();
+    const brand = await db.brand.update({
+      where: {
+        id,
+      },
+      data: {
+        title,
+      },
     });
-
-    return NextResponse.json({
-      message: 'Brand deleted successfully',
-      brand: deletedBrand
-    });
+    console.log(brand);
+    return NextResponse.json(brand);
   } catch (error) {
-    console.error('Error deleting brand:', error);
+    console.log(error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      {
+        error,
+        message: "Failed to Update the brand",
+      },
+      {
+        status: 500,
+      }
     );
   }
 }
-
- 

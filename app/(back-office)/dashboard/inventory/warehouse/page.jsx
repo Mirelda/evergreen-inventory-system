@@ -205,6 +205,8 @@ function Warehouse() {
         onBulkExport={handleBulkExport}
         enableAdvancedFiltering={true}
         filters={filters}
+        endpoint="warehouse"
+        resourceTitle="warehouse"
       />
     </div>
   );

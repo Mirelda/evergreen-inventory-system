@@ -163,6 +163,8 @@ function Categories() {
         onBulkExport={handleBulkExport}
         enableAdvancedFiltering={true}
         filters={filters}
+        endpoint="categories"
+        resourceTitle="category"
       />
     </div>
   );

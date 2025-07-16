@@ -205,6 +205,8 @@ function Items() {
         onBulkExport={handleBulkExport}
         enableAdvancedFiltering={true}
         filters={filters}
+        endpoint="items"
+        resourceTitle="item"
       />
     </div>
   );

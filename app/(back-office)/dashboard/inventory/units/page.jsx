@@ -168,6 +168,8 @@ function Units() {
         onBulkExport={handleBulkExport}
         enableAdvancedFiltering={true}
         filters={filters}
+        endpoint="units"
+        resourceTitle="unit"
       />
     </div>
   );

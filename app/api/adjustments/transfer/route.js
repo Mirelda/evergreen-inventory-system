@@ -1,84 +1,174 @@
+import db from "@/lib/db";
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
-
-// GET /api/adjustments/transfer
-export async function GET() {
+export async function POST(request) {
   try {
-    const transfers = await prisma.transferStockAdjustment.findMany({
-      include: {
-        item: {
-          select: {
-            id: true,
-            title: true,
-          },
+    const {
+      transferStockQty,
+      itemId,
+      givingWarehouseId,
+      recievingWarehouseId,
+      notes,
+      referenceNumber,
+    } = await request.json();
+
+    // Validate item, giving warehouse, and receiving warehouse existence
+    const item = await db.item.findUnique({ where: { id: itemId } });
+    const givingWarehouse = await db.warehouse.findUnique({
+      where: { id: givingWarehouseId },
+    });
+    const receivingWarehouse = await db.warehouse.findUnique({
+      where: { id: recievingWarehouseId },
+    });
+
+    if (!item || !givingWarehouse || !receivingWarehouse) {
+      throw new Error("Invalid warehouse IDs or item not found");
+    }
+
+    // Validate sufficient stock in giving warehouse
+    const givingWarehouseItem = await db.warehouseItem.findFirst({
+      where: { itemId, warehouseId: givingWarehouseId },
+    });
+
+    if (
+      !givingWarehouseItem ||
+      givingWarehouseItem.quantity < parseInt(transferStockQty)
+    ) {
+      return NextResponse.json(
+        {
+          data: null,
+          message: "Insufficient stock in giving warehouse",
         },
-      },
-      orderBy: {
-        createdAt: 'desc',
+        { status: 409 }
+      );
+    }
+
+    // Update stock in giving warehouse
+    await db.warehouseItem.update({
+      where: { id: givingWarehouseItem.id },
+      data: {
+        quantity: givingWarehouseItem.quantity - parseInt(transferStockQty),
       },
     });
 
-    // Get warehouse details for giving and receiving warehouses
-    const transfersWithWarehouses = await Promise.all(
-      transfers.map(async (transfer) => {
-        const [givingWarehouse, receivingWarehouse] = await Promise.all([
-          prisma.warehouse.findUnique({
-            where: { id: transfer.givingWarehouseId },
-            select: { id: true, title: true },
-          }),
-          prisma.warehouse.findUnique({
-            where: { id: transfer.receivingWarehouseId },
-            select: { id: true, title: true },
-          }),
-        ]);
+    // Check if item exists in the receiving warehouse
+    const existingWarehouseItem = await db.warehouseItem.findFirst({
+      where: {
+        itemId,
+        warehouseId: recievingWarehouseId,
+      },
+    });
 
-        return {
-          ...transfer,
-          givingWarehouse,
-          receivingWarehouse,
-        };
-      })
-    );
+    let updatedOrCreatedWarehouseItem;
+    if (existingWarehouseItem) {
+      console.log(existingWarehouseItem);
+      // Update quantity if item exists in receiving warehouse
+      updatedOrCreatedWarehouseItem = await db.warehouseItem.update({
+        where: { id: existingWarehouseItem.id },
+        data: {
+          quantity: existingWarehouseItem.quantity + parseInt(transferStockQty),
+        },
+      });
+    } else {
+      console.log("created");
+      // Create new warehouse item if it doesn't exist in receiving warehouse
+      updatedOrCreatedWarehouseItem = await db.warehouseItem.create({
+        data: {
+          itemId,
+          quantity: parseInt(transferStockQty),
+          warehouseId: recievingWarehouseId,
+          givingWarehouseId,
+          fromWarehouse: givingWarehouse.title,
+          currentWarehouse: receivingWarehouse.title,
+          imageUrl: item.imageUrl,
+          title: item.title,
+          notes,
+          referenceNumber,
+        },
+      });
 
-    return NextResponse.json(transfersWithWarehouses);
-  } catch (error) {
-    console.error("Get transfer stock adjustments error:", error);
-    return NextResponse.json({ error: "Failed to fetch transfers." }, { status: 500 });
-  }
-}
+      // Update the stock quantity of the giving warehouse
+      await db.warehouse.update({
+        where: { id: givingWarehouseId },
+        data: {
+          stockQty: givingWarehouse.stockQty - parseInt(transferStockQty),
+        },
+      });
 
-// POST /api/adjustments/transfer
-export async function POST(request) {
-  try {
-    const body = await request.json();
-    const { itemId, givingWarehouseId, receivingWarehouseId, transferStockQuantity, referenceNumber, notes } = body;
-
-    if (!itemId || !givingWarehouseId || !receivingWarehouseId || !transferStockQuantity || !referenceNumber) {
-      return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
+      // Update the stock quantity of the receiving warehouse
+      await db.warehouse.update({
+        where: { id: recievingWarehouseId },
+        data: {
+          stockQty: receivingWarehouse.stockQty + parseInt(transferStockQty),
+        },
+      });
     }
 
-    // Create transfer record
-    const transfer = await prisma.transferStockAdjustment.create({
+    // Create stock transfer adjustment record
+    const adjustment = await db.transferStockAdjustment.create({
       data: {
         itemId,
-        givingWarehouseId,
-        receivingWarehouseId,
-        transferStockQuantity: Number(transferStockQuantity),
         referenceNumber,
+        transferStockQty: parseInt(transferStockQty),
+        givingWarehouseId,
+        recievingWarehouseId,
         notes,
       },
     });
 
-    // Note: In this current implementation, we don't update the item's global quantity
-    // since we're just transferring between warehouses. The global quantity remains the same.
-    // In a real-world scenario, you might want to track stock per warehouse separately.
-    // For now, we just record the transfer without changing the global stock quantity.
-
-    return NextResponse.json(transfer, { status: 201 });
+    return NextResponse.json({ updatedOrCreatedWarehouseItem, adjustment });
   } catch (error) {
-    console.error("Stock transfer error:", error);
-    return NextResponse.json({ error: "Failed to transfer stock." }, { status: 500 });
+    console.error(error);
+    return NextResponse.json(
+      {
+        error,
+        message: "Failed to create adjustment",
+      },
+      { status: 500 }
+    );
   }
-} 
+}
+
+export async function GET(request) {
+  try {
+    const adjustments = await db.transferStockAdjustment.findMany({
+      orderBy: {
+        createdAt: "desc", // Latest adjustment
+      },
+      include: {
+        item: true,
+        givingWarehouse: true,
+        receivingWarehouse: true,
+      },
+    });
+    return NextResponse.json(adjustments);
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json(
+      {
+        error,
+        message: "Failed to fetch adjustments",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request) {
+  try {
+    const id = request.nextUrl.searchParams.get("id");
+    const deletedAdjustment = await db.transferStockAdjustment.delete({
+      where: { id },
+    });
+    return NextResponse.json(deletedAdjustment);
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json(
+      {
+        error,
+        message: "Failed to delete the adjustment",
+      },
+      { status: 500 }
+    );
+  }
+}

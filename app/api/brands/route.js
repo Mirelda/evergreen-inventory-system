@@ -1,26 +1,23 @@
+import db from "@/lib/db";
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
-
-export async function GET() {
+export async function POST(request) {
   try {
-    const brands = await prisma.brand.findMany({
-      include: {
-        items: true,
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
+    const { title } = await request.json();
 
-    return NextResponse.json(brands);
+    const brand = await db.brand.create({
+      data: {
+        title,
+      },
+    });
+    console.log(brand);
+    return NextResponse.json(brand);
   } catch (error) {
     console.log(error);
     return NextResponse.json(
       {
         error,
-        message: "Failed to fetch brands",
+        message: "Failed to create a Unit",
       },
       {
         status: 500,
@@ -29,28 +26,42 @@ export async function GET() {
   }
 }
 
-export async function POST(request) {
+export async function GET(request) {
   try {
-    const { title } = await request.json();
-
-    // Save brand to database
-    const brand = await prisma.brand.create({
-      data: {
-        title,
-      },
-      include: {
-        items: true,
+    const brands = await db.brand.findMany({
+      orderBy: {
+        createdAt: "desc", //Latest brands
       },
     });
-
-    console.log("Brand created:", brand);
-    return NextResponse.json(brand);
+    return NextResponse.json(brands);
   } catch (error) {
     console.log(error);
     return NextResponse.json(
       {
         error,
-        message: "Failed to create a brand",
+        message: "Failed to Fetch the brands",
+      },
+      {
+        status: 500,
+      }
+    );
+  }
+}
+export async function DELETE(request) {
+  try {
+    const id = request.nextUrl.searchParams.get("id");
+    const deletedBrand = await db.brand.delete({
+      where: {
+        id,
+      },
+    });
+    return NextResponse.json(deletedBrand);
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json(
+      {
+        error,
+        message: "Failed to Delete Category",
       },
       {
         status: 500,

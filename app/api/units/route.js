@@ -1,26 +1,45 @@
+import db from "@/lib/db";
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
-
-export async function GET() {
+export async function POST(request) {
   try {
-    const units = await prisma.unit.findMany({
-      include: {
-        items: true,
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
+    const { title, abbreviation } = await request.json();
 
+    const unit = await db.unit.create({
+      data: {
+        title,
+        abbreviation,
+      },
+    });
+    console.log(unit);
+    return NextResponse.json(unit);
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json(
+      {
+        error,
+        message: "Failed to create a Unit",
+      },
+      {
+        status: 500,
+      }
+    );
+  }
+}
+export async function GET(request) {
+  try {
+    const units = await db.unit.findMany({
+      orderBy: {
+        createdAt: "desc", //Latest category
+      },
+    });
     return NextResponse.json(units);
   } catch (error) {
     console.log(error);
     return NextResponse.json(
       {
         error,
-        message: "Failed to fetch units",
+        message: "Failed to Fetch the units",
       },
       {
         status: 500,
@@ -29,29 +48,21 @@ export async function GET() {
   }
 }
 
-export async function POST(request) {
+export async function DELETE(request) {
   try {
-    const { title, abbreviation } = await request.json();
-
-    // Save unit to database
-    const unit = await prisma.unit.create({
-      data: {
-        title,
-        abbreviation,
-      },
-      include: {
-        items: true,
+    const id = request.nextUrl.searchParams.get("id");
+    const deletedUnit = await db.unit.delete({
+      where: {
+        id,
       },
     });
-
-    console.log("Unit created:", unit);
-    return NextResponse.json(unit);
+    return NextResponse.json(deletedUnit);
   } catch (error) {
     console.log(error);
     return NextResponse.json(
       {
         error,
-        message: "Failed to create a unit",
+        message: "Failed to Delete Unit",
       },
       {
         status: 500,

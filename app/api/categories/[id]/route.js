@@ -1,39 +1,20 @@
+import db from "@/lib/db";
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
-
-export async function GET(request, { params }) {
+export async function GET(request, { params: { id } }) {
   try {
-    const id = await params.id;
-    
-    const category = await prisma.category.findUnique({
+    const category = await db.category.findUnique({
       where: {
-        id: id,
-      },
-      include: {
-        items: true,
+        id,
       },
     });
-
-    if (!category) {
-      return NextResponse.json(
-        {
-          message: "Category not found",
-        },
-        {
-          status: 404,
-        }
-      );
-    }
-
     return NextResponse.json(category);
   } catch (error) {
     console.log(error);
     return NextResponse.json(
       {
         error,
-        message: "Failed to fetch category",
+        message: "Failed to Fetch the Category",
       },
       {
         status: 500,
@@ -42,32 +23,26 @@ export async function GET(request, { params }) {
   }
 }
 
-export async function PUT(request, { params }) {
+export async function PUT(request, { params: { id } }) {
   try {
-    const id = await params.id;
-    const data = await request.json();
-
-    const updatedCategory = await prisma.category.update({
+    const { title, description } = await request.json();
+    const category = await db.category.update({
       where: {
-        id: id,
+        id,
       },
       data: {
-        title: data.title,
-        description: data.description,
-      },
-      include: {
-        items: true,
+        title,
+        description,
       },
     });
-
-    console.log("Category updated:", updatedCategory);
-    return NextResponse.json(updatedCategory);
+    console.log(category);
+    return NextResponse.json(category);
   } catch (error) {
     console.log(error);
     return NextResponse.json(
       {
         error,
-        message: "Failed to update category",
+        message: "Failed to Update the Category",
       },
       {
         status: 500,
@@ -75,33 +50,3 @@ export async function PUT(request, { params }) {
     );
   }
 }
-
-export async function DELETE(request, { params }) {
-  try {
-    const id = await params.id;
-    
-    const deletedCategory = await prisma.category.delete({
-      where: {
-        id: id,
-      },
-    });
-
-    return NextResponse.json({
-      message: "Category deleted successfully",
-      category: deletedCategory,
-    });
-  } catch (error) {
-    console.log(error);
-    return NextResponse.json(
-      {
-        error,
-        message: "Failed to delete category",
-      },
-      {
-        status: 500,
-      }
-    );
-  }
-}
-
- 

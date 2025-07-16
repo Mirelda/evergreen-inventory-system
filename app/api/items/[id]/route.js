@@ -1,40 +1,23 @@
+import db from "@/lib/db";
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
-
-export async function GET(request, { params }) {
+export async function GET(request, { params: { id } }) {
   try {
-    const id = await params.id;
-    const item = await prisma.item.findUnique({
+    const item = await db.item.findUnique({
       where: {
-        id: id,
+        id,
       },
       include: {
-        category: true,
-        brand: true,
-        unit: true,
+        warehouse: true,
       },
     });
-
-    if (!item) {
-      return NextResponse.json(
-        {
-          message: "Item not found",
-        },
-        {
-          status: 404,
-        }
-      );
-    }
-
     return NextResponse.json(item);
   } catch (error) {
     console.log(error);
     return NextResponse.json(
       {
         error,
-        message: "Failed to fetch item",
+        message: "Failed to Fetch the Item",
       },
       {
         status: 500,
@@ -43,48 +26,42 @@ export async function GET(request, { params }) {
   }
 }
 
-export async function PUT(request, { params }) {
+export async function PUT(request, { params: { id } }) {
   try {
-    const id = await params.id;
-    const data = await request.json();
-
-    const updatedItem = await prisma.item.update({
+    const itemData = await request.json();
+    const item = await db.item.update({
       where: {
-        id: id,
+        id,
       },
       data: {
-        title: data.title,
-        description: data.description,
-        sku: data.sku,
-        barcode: data.barcode,
-        quantity: data.quantity,
-        unitId: data.unitId,
-        brandId: data.brandId,
-        categoryId: data.categoryId,
-        unitPrice: data.unitPrice,
-        sellingPrice: data.sellingPrice,
-        buyingPrice: data.buyingPrice,
-        reorderPoint: data.reorderPoint,
-        imageUrl: data.imageUrl,
-        dimensions: data.dimensions,
-        taxRate: data.taxRate,
-        notes: data.notes,
-      },
-      include: {
-        category: true,
-        brand: true,
-        unit: true,
+        title: itemData.title,
+        categoryId: itemData.categoryId,
+        sku: itemData.sku,
+        barcode: itemData.barcode,
+        quantity: parseInt(itemData.qty),
+        unitId: itemData.unitId,
+        brandId: itemData.brandId,
+        supplierId: itemData.supplierId,
+        buyingPrice: parseFloat(itemData.buyingPrice),
+        sellingPrice: parseFloat(itemData.sellingPrice),
+        reOrderPoint: parseInt(itemData.reOrderPoint),
+        warehouseId: itemData.warehouseId,
+        imageUrl: itemData.imageUrl,
+        weight: parseFloat(itemData.weight),
+        dimensions: itemData.dimensions,
+        taxRate: parseFloat(itemData.taxRate),
+        description: itemData.description,
+        notes: itemData.notes,
       },
     });
-
-    console.log("Item updated:", updatedItem);
-    return NextResponse.json(updatedItem);
+    console.log(item);
+    return NextResponse.json(item);
   } catch (error) {
     console.log(error);
     return NextResponse.json(
       {
         error,
-        message: "Failed to update item",
+        message: "Failed to Update the item",
       },
       {
         status: 500,
@@ -92,32 +69,3 @@ export async function PUT(request, { params }) {
     );
   }
 }
-
-export async function DELETE(request, { params }) {
-  try {
-    const id = await params.id;
-    const deletedItem = await prisma.item.delete({
-      where: {
-        id: id,
-      },
-    });
-
-    return NextResponse.json({
-      message: "Item deleted successfully",
-      item: deletedItem,
-    });
-  } catch (error) {
-    console.log(error);
-    return NextResponse.json(
-      {
-        error,
-        message: "Failed to delete item",
-      },
-      {
-        status: 500,
-      }
-    );
-  }
-}
-
- 

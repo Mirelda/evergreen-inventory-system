@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Search, Edit, Trash2, Plus, ChevronDown, ChevronUp, Download, CheckSquare, Square, Filter, X } from "lucide-react";
 import Link from "next/link";
+import DeleteBtn from "@/components/dashboard/DeleteBtn";
 
 function DataTable({
   title = "Data Table",
@@ -24,6 +25,8 @@ function DataTable({
   onBulkExport,
   enableAdvancedFiltering = false,
   filters = [],
+  endpoint = "",
+  resourceTitle = "item",
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
@@ -662,13 +665,11 @@ function DataTable({
                           </button>
                         )}
                         {onDelete && (
-                          <button
-                            onClick={() => onDelete(item)}
-                            className="text-red-600 hover:text-red-800 transition-colors"
-                            title="Delete"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          <DeleteBtn 
+                            id={item.id} 
+                            endpoint={endpoint} 
+                            resourceTitle={resourceTitle}
+                          />
                         )}
                       </div>
                     </td>

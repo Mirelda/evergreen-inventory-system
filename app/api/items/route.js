@@ -1,28 +1,71 @@
+import db from "@/lib/db";
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
-
-export async function GET() {
+const { ObjectId } = require("mongodb");
+export async function POST(request) {
   try {
-    const items = await prisma.item.findMany({
-      include: {
-        category: true,
-        brand: true,
-        unit: true,
+    const itemData = await request.json();
+    function generateObjectId() {
+      return new ObjectId();
+    }
+    // console.log(itemData);
+    const existingItem = await db.item.findUnique({
+      where: {
+        slug: itemData.slug,
       },
-      orderBy: {
-        createdAt: 'desc'
-      }
     });
-
-    return NextResponse.json(items);
+    if (existingItem) {
+      return NextResponse.json(existingItem);
+    }
+    const item = await db.item.create({
+      data: {
+        title: itemData.title,
+        categoryId: itemData.categoryId,
+        sku: itemData.sku,
+        barcode: itemData.barcode,
+        quantity: parseInt(itemData.qty),
+        unitId: itemData.unitId,
+        brandId: itemData.brandId,
+        supplierId: itemData.supplierId,
+        buyingPrice: parseFloat(itemData.buyingPrice),
+        sellingPrice: parseFloat(itemData.sellingPrice),
+        reOrderPoint: parseInt(itemData.reOrderPoint),
+        imageUrl: itemData.imageUrl,
+        weight: parseFloat(itemData.weight),
+        dimensions: itemData.dimensions,
+        taxRate: parseFloat(itemData.taxRate),
+        description: itemData.description,
+        notes: itemData.notes,
+        slug: itemData.slug,
+      },
+    });
+    console.log(item);
+    //Fetch all warehouses
+    const warehouses = await prisma.warehouse.findMany();
+    console.log(warehouses);
+    //Find the main branch
+    const mainWarehouse = warehouses.find((w) => w.warehouseType === "main");
+    console.log(mainWarehouse);
+    const newWarehouseItem = await prisma.warehouseItem.create({
+      data: {
+        itemId: item.id,
+        quantity: item.quantity,
+        warehouseId: mainWarehouse.id,
+        givingWarehouseId: generateObjectId(),
+        fromWarehouse: mainWarehouse.title,
+        currentWarehouse: mainWarehouse.title,
+        imageUrl: item.imageUrl,
+        title: item.title,
+        notes: "created from main",
+        referenceNumber: "001",
+      },
+    });
+    return NextResponse.json(item);
   } catch (error) {
     console.log(error);
     return NextResponse.json(
       {
         error,
-        message: "Failed to fetch items",
+        message: "Failed to create a Item",
       },
       {
         status: 500,
@@ -31,44 +74,47 @@ export async function GET() {
   }
 }
 
-export async function POST(request) {
+export async function GET(request) {
   try {
-    const data = await request.json();
-
-    console.log("Received data:", data);
-
-    // Save item to database
-    const item = await prisma.item.create({
-      data: {
-        title: data.title,
-        categoryId: data.categoryId,
-        sku: data.sku,
-        barcode: data.barcode,
-        quantity: data.qty ? parseInt(data.qty) : 0,
-        unitId: data.unitId,
-        brandId: data.brandId,
-        buyingPrice: data.buyingPrice ? parseFloat(data.buyingPrice) : 0,
-        sellingPrice: data.sellingPrice ? parseFloat(data.sellingPrice) : 0,
-        unitPrice: data.unitPrice ? parseFloat(data.unitPrice) : (data.buyingPrice ? parseFloat(data.buyingPrice) : 0),
-        reorderPoint: data.reOrderPoint ? parseInt(data.reOrderPoint) : null,
-        imageUrl: data.imageUrl || null,
-        weight: data.weight ? parseFloat(data.weight) : null,
-        dimensions: data.dimensions || null,
-        taxRate: data.taxRate ? parseFloat(data.taxRate) : null,
-        description: data.description || null,
-        notes: data.notes || null,
-        warehouseId: data.warehouseId || null,
+    const items = await db.item.findMany({
+      orderBy: {
+        createdAt: "desc", //Latest category
+      },
+      include: {
+        category: true, // Returns all fields for all categories
+        warehouseItems: true, // Returns all warehouse items fields
       },
     });
-
-    console.log("Item created:", item);
-    return NextResponse.json(item);
+    return NextResponse.json(items);
   } catch (error) {
     console.log(error);
     return NextResponse.json(
       {
         error,
-        message: "Failed to create an item",
+        message: "Failed to Fetch items",
+      },
+      {
+        status: 500,
+      }
+    );
+  }
+}
+
+export async function DELETE(request) {
+  try {
+    const id = request.nextUrl.searchParams.get("id");
+    const deletedItem = await db.item.delete({
+      where: {
+        id,
+      },
+    });
+    return NextResponse.json(deletedItem);
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json(
+      {
+        error,
+        message: "Failed to Delete Item",
       },
       {
         status: 500,
