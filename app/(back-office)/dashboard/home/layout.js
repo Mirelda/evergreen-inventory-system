@@ -1,6 +1,7 @@
 import HomeNavbar from "@/components/dashboard/HomeNavbar";
+import React from "react";
 
-function Layout({ children }) {
+export default function Layout({ children }) {
   return (
     <div className="">
       <HomeNavbar />
@@ -8,5 +9,3 @@ function Layout({ children }) {
     </div>
   );
 }
-
-export default Layout;

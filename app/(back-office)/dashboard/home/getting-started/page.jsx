@@ -1,9 +1,9 @@
-function GettingStarted() {
+import React from "react";
+
+export default function GettingStarted() {
   return (
     <div>
-      <h2>GettingStarted</h2>
+      <h2>Get started</h2>
     </div>
   );
 }
-
-export default GettingStarted;

@@ -1,126 +1,103 @@
 "use client";
-import FormHeader from "@/components/dashboard/FormHeader";
-import { Plus, X } from "lucide-react";
-import Link from "next/link";
-import { useForm } from "react-hook-form";
-import TextInput from "@/components/formInputs/TextInput";
-import { useState } from "react";
-import SubmitButton from "@/components/formInputs/SubmitButton";
-import TextAreaInput from "@/components/formInputs/TextAreaInput";
-import SelectInput from "@/components/formInputs/SelectInput";
 
-function NewWarehouse() {
+import SelectInput from "@/components/FormInputs/SelectInput";
+import SubmitButton from "@/components/FormInputs/SubmitButton";
+import TextInput from "@/components/FormInputs/TextInput";
+import TextareaInput from "@/components/FormInputs/TextareaInput";
+import FormHeader from "@/components/dashboard/FormHeader";
+import { makePostRequest, makePutRequest } from "@/lib/apiRequest";
+import { Plus, X } from "lucide-react";
+import { revalidatePath } from "next/cache";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+
+export default function NewWarehouse({ initialData = {}, isUpdate = false }) {
+  const router = useRouter();
   const selectOptions = [
-    { label: "Main", value: "main" },
-    { label: "Branch", value: "branch" },
+    {
+      title: "Main",
+      id: "main",
+    },
+    {
+      title: "Branch",
+      id: "branch",
+    },
   ];
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm();
+  } = useForm({ defaultValues: initialData });
   const [loading, setLoading] = useState(false);
-
+  function redirect() {
+    router.push("/dashboard/inventory/warehouse");
+  }
   async function onSubmit(data) {
     console.log(data);
-    setLoading(true);
-    try {
-      const response = await fetch('/api/warehouse', {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-      if (response.ok) {
-        console.log(response);
-        setLoading(false);
-        reset();
-        alert("Warehouse created successfully!");
-      } else {
-        const errorData = await response.json();
-        console.error("Error creating warehouse:", errorData);
-        setLoading(false);
-        alert("Error creating warehouse. Please try again.");
-      }
-    } catch (error) {
-      setLoading(false);
-      console.log(error);
-      alert("Error creating warehouse. Please try again.");
+    if (isUpdate) {
+      // Update request
+      makePutRequest(
+        setLoading,
+        `api/warehouse/${initialData.id}`,
+        data,
+        "Warehouse",
+        redirect,
+        reset
+      );
+    } else {
+      makePostRequest(setLoading, "api/warehouse", data, "Warehouse", reset);
     }
   }
-
   return (
     <div>
       {/* Header */}
-      <FormHeader title="New Warehouse" href="/dashboard/inventory/" />
-
+      <FormHeader
+        title={isUpdate ? "Update Warehouse" : "New Warehouse"}
+        href="/dashboard/inventory/warehouse"
+      />
       {/* Form */}
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="w-full max-w-4xl p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:p-6 md:p-8 light:bg-gray-800 light:border-gray-700 mx-auto my-3"
+        className="w-full max-w-4xl p-4 bg-white border border-gray-200 rounded-lg shadow sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700 mx-auto my-3"
       >
         <div className="grid gap-4 sm:grid-cols-2 sm:gap-6">
-          {/* Warehouse Type */}
           <SelectInput
-            name="warehouseType"
-            label="Warehouse Type"
+            name="type"
+            label="Select the Warehouse Type"
             register={register}
-            errors={errors}
             className="w-full"
             options={selectOptions}
           />
-
-          {/* Warehouse Title */}
           <TextInput
             label="Warehouse Title"
             name="title"
             register={register}
             errors={errors}
             className="w-full"
-            validation={{
-              minLength: { value: 2, message: "Warehouse name must be at least 2 characters" },
-              maxLength: { value: 50, message: "Warehouse name must be less than 50 characters" },
-              pattern: {
-                value: /^[a-zA-Z0-9\s\-_]+$/,
-                message: "Warehouse name can only contain letters, numbers, spaces, hyphens and underscores"
-              }
-            }}
-            placeholder="e.g., Main Warehouse, Branch A"
           />
-
-          {/* Warehouse Location */}
           <TextInput
             label="Warehouse Location"
             name="location"
             register={register}
             errors={errors}
-            validation={{
-              minLength: { value: 5, message: "Location must be at least 5 characters" },
-              maxLength: { value: 200, message: "Location must be less than 200 characters" }
-            }}
-            placeholder="e.g., 123 Main St, City, Country"
           />
 
-          {/* Warehouse Description */}
-          <TextAreaInput
+          <TextareaInput
             label="Warehouse Description"
             name="description"
             register={register}
             errors={errors}
-            isRequired={false}
-            validation={{
-              maxLength: { value: 500, message: "Description must be less than 500 characters" }
-            }}
-            placeholder="Brief description of the warehouse"
-            rows={4}
           />
         </div>
-        <SubmitButton isLoading={loading} title="Warehouse" />
+        <SubmitButton
+          isLoading={loading}
+          title={isUpdate ? "Updated Warehouse" : "New Warehouse"}
+        />
       </form>
     </div>
   );
 }
-
-export default NewWarehouse;

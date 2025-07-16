@@ -1,28 +1,29 @@
 "use client";
-
-import Sidebar from "@/components/dashboard/Sidebar";
 import Header from "@/components/dashboard/Header";
-import { useState } from "react";
+import Sidebar from "@/components/dashboard/Sidebar";
+import { useSession } from "next-auth/react";
+import React, { useState } from "react";
+import Login from "../login/page";
 
 export default function Layout({ children }) {
   const [showSidebar, setShowSidebar] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
-
+  const { data: session, status } = useSession();
+  if (status === "loading") {
+    return (
+      <div className="bg-slate-50 flex min-h-screen items-center justify-center">
+        <p>Loading User Please Wait...</p>;
+      </div>
+    );
+  }
+  if (status === "unauthenticated") {
+    return <Login />;
+  }
   return (
-    <div className="flex min-h-screen bg-slate-100">
-      {/* Mobilde sidebar açıkken overlay */}
-      {showSidebar && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={() => setShowSidebar(false)}
-        />
-      )}
-      <Sidebar showSidebar={showSidebar} setShowSidebar={setShowSidebar} collapsed={collapsed} setCollapsed={setCollapsed} />
-      <main className="flex-1 flex flex-col min-h-screen">
+    <div className="flex">
+      <Sidebar showSidebar={showSidebar} setShowSidebar={setShowSidebar} />
+      <main className="lg:ml-60 ml-0 w-full bg-slate-100 min-h-screen">
         <Header setShowSidebar={setShowSidebar} />
-        <div className="flex-1">
-          {children}
-        </div>
+        {children}
       </main>
     </div>
   );
