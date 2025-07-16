@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import SalesOverview from "@/components/dashboard/SalesOverview";
 import AnalyticsCard from "@/components/dashboard/AnalyticsCard";
 import ChartCard from "@/components/dashboard/ChartCard";
@@ -8,6 +9,7 @@ import BarChart from "@/components/dashboard/BarChart";
 import PieChart from "@/components/dashboard/PieChart";
 
 function Dashboard() {
+  const { data: session } = useSession();
   const [analyticsData, setAnalyticsData] = useState({
     overview: null,
     lowStock: [],
@@ -59,6 +61,39 @@ function Dashboard() {
 
   return (
     <div className="space-y-6 p-6">
+      {/* User Welcome Section */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Hello, {session?.user?.name || "User"}! 👋
+            </h1>
+            <p className="text-gray-600 mt-1">
+              Welcome back to your inventory dashboard. Here's what's happening today.
+            </p>
+            <div className="mt-2 text-sm text-gray-500">
+              Logged in as: {session?.user?.email || "user@example.com"}
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-sm text-gray-500">
+              {new Date().toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })}
+            </div>
+            <div className="text-xs text-gray-400">
+              {new Date().toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Top Analytics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <AnalyticsCard
