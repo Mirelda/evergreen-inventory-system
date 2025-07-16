@@ -1,58 +1,75 @@
-import { Check, CheckCircle2 } from "lucide-react";
-import Link from "next/link";
+import React from "react";
 import SalesActivityCard from "./SalesActivityCard";
 import InventorySummaryCard from "./InventorySummaryCard";
+import { getData } from "@/lib/getData";
 
-function SalesOverview() {
-  const inventorySummary = [
-    { title: "Quantity in Hand", number: 10 },
-    { title: "Quantity to be received", number: 0 },
-  ];
+export default async function SalesOverview() {
+  const categories = (await getData("categories")) || [];
+  const items = (await getData("items")) || [];
+  const warehouses = (await getData("warehouse")) || [];
+  const suppliers = (await getData("suppliers")) || [];
+
+  // Parallel fetching
+  // const [categories, items, warehouses, suppliers] = await Promise.all([
+  //   categoriesData,
+  //   itemsData,
+  //   warehousesData,
+  //   suppliersData,
+  // ]);
+  const inventorySummary = warehouses.map((item, i) => {
+    return {
+      title: item.title,
+      number: item.warehouseItems.length,
+    };
+  });
+
   const salesActivity = [
     {
-      title: "To be Packed",
-      number: 10,
+      title: "Categories",
+      number: categories.length,
       unit: "Qty",
-      href: "#",
+      href: "/dashboard/inventory/categories",
       color: "text-blue-600",
     },
     {
-      title: "To be Shipped",
-      number: 0,
+      title: "Items",
+      number: items.length,
       unit: "Pkgs",
-      href: "#",
+      href: "/dashboard/inventory/items",
       color: "text-red-600",
     },
     {
-      title: "To be Delivered",
-      number: 0,
+      title: "Warehouses",
+      number: warehouses.length,
       unit: "Pkgs",
-      href: "#",
+      href: "/dashboard/inventory/warehouse",
       color: "text-green-600",
     },
     {
-      title: "To be Invoiced",
-      number: 0,
+      title: "Suppliers",
+      number: suppliers.length,
       unit: "Qty",
-      href: "#",
-      color: "text-yellow-600",
+      href: "/dashboard/inventory/suppliers",
+      color: "text-orange-600",
     },
   ];
+
   return (
-    <div className="bg-blue-50 border-b border-slate-300 grid grid-cols-1 lg:grid-cols-12 gap-4">
-      {/* sales activity */}
-      <div className="p-4 lg:p-8 lg:col-span-8 lg:border-r border-slate-300">
-        <h2 className="mb-4 lg:mb-6 text-lg lg:text-xl">Sales Activity</h2>
-        <div className="lg:pr-8 grid grid-cols-2 md:grid-cols-4 gap-3 lg:gap-4">
-          {/* card */}
-          {salesActivity.map((item, i) => {
-            return <SalesActivityCard item={item} key={i} />;
-          })}
+    <div className="bg-blue-50 border-b border-slate-300  grid grid-cols-12 gap-4">
+      {/* SALES ACTIVITY */}
+      <div className="col-span-full lg:col-span-8 border-r border-slate-300 p-8 py-16 lg:py-8">
+        <h2 className="mb-6 text-xl">Overview</h2>
+        <div className=" pr-8 grid sm:grid-cols-2 md:grid-cols-3  lg:grid-cols-4 gap-4">
+          {/* Card */}
+          {salesActivity &&
+            salesActivity.map((item, i) => {
+              return <SalesActivityCard item={item} key={i} />;
+            })}
         </div>
       </div>
-      {/* inventory summary */}
-      <div className="lg:col-span-4 p-4 lg:p-8">
-        <h2 className="mb-4 lg:mb-6 text-lg lg:text-xl">Inventory Summary</h2>
+      {/* INVENTORY SUMMARY */}
+      <div className="col-span-full lg:col-span-4 p-8">
+        <h2 className="mb-6 text-xl">Inventory Summary</h2>
         <div className="">
           {inventorySummary.map((item, i) => {
             return <InventorySummaryCard item={item} key={i} />;
@@ -62,5 +79,3 @@ function SalesOverview() {
     </div>
   );
 }
-
-export default SalesOverview;
