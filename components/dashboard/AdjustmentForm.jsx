@@ -17,7 +17,22 @@ export default function AdjustmentForm({ type = "add", items = [], warehouses = 
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    // If e has a target property, it's a standard event object
+    if (e && e.target) {
+      setForm({ ...form, [e.target.name]: e.target.value });
+    } else {
+      // If not, it's likely a direct value from TextInput
+      // This shouldn't happen with current TextInput implementation, but keeping for safety
+      console.warn('Unexpected input format:', e);
+    }
+  };
+
+  const handleSelectChange = (name, value) => {
+    setForm({ ...form, [name]: value });
+  };
+
+  const handleTextChange = (name, value) => {
+    setForm({ ...form, [name]: value });
   };
 
   const handleSubmit = async (e) => {
@@ -75,7 +90,7 @@ export default function AdjustmentForm({ type = "add", items = [], warehouses = 
             label="Item"
             name="itemId"
             value={form.itemId}
-            onChange={handleChange}
+            onChange={(value) => handleSelectChange("itemId", value)}
             required
             options={[
               { value: "", label: "Select an item" },
@@ -91,7 +106,7 @@ export default function AdjustmentForm({ type = "add", items = [], warehouses = 
               label="Warehouse"
               name="warehouseId"
               value={form.warehouseId}
-              onChange={handleChange}
+              onChange={(value) => handleSelectChange("warehouseId", value)}
               required
               options={[
                 { value: "", label: "Select a warehouse" },
@@ -105,7 +120,7 @@ export default function AdjustmentForm({ type = "add", items = [], warehouses = 
               label="From Warehouse"
               name="givingWarehouseId"
               value={form.givingWarehouseId}
-              onChange={handleChange}
+              onChange={(value) => handleSelectChange("givingWarehouseId", value)}
               required
               options={[
                 { value: "", label: "Select source warehouse" },
@@ -116,7 +131,7 @@ export default function AdjustmentForm({ type = "add", items = [], warehouses = 
               label="To Warehouse"
               name="receivingWarehouseId"
               value={form.receivingWarehouseId}
-              onChange={handleChange}
+              onChange={(value) => handleSelectChange("receivingWarehouseId", value)}
               required
               options={[
                 { value: "", label: "Select destination warehouse" },
@@ -132,7 +147,7 @@ export default function AdjustmentForm({ type = "add", items = [], warehouses = 
           name="quantity"
           type="number"
           value={form.quantity}
-          onChange={handleChange}
+          onChange={(value) => handleTextChange("quantity", value)}
           required
           min={1}
           placeholder="Enter quantity"
@@ -142,7 +157,7 @@ export default function AdjustmentForm({ type = "add", items = [], warehouses = 
           name="referenceNumber"
           type="text"
           value={form.referenceNumber}
-          onChange={handleChange}
+          onChange={(value) => handleTextChange("referenceNumber", value)}
           required
           placeholder="Enter reference number"
         />
@@ -153,7 +168,7 @@ export default function AdjustmentForm({ type = "add", items = [], warehouses = 
         label="Notes"
         name="notes"
         value={form.notes}
-        onChange={handleChange}
+        onChange={(value) => handleTextChange("notes", value)}
         placeholder="Enter any additional notes..."
         rows={3}
       />
