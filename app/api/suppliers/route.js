@@ -1,5 +1,7 @@
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/authOptions";
 
 export async function POST(request) {
   try {
@@ -66,20 +68,31 @@ export async function GET(request) {
   }
 }
 export async function DELETE(request) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || (session.user.role !== 'ADMIN' && session.user.role !== 'MANAGER')) {
+    return NextResponse.json(
+      { message: "Unauthorized: You do not have permission to delete suppliers." },
+      { status: 403 }
+    );
+  }
+
   try {
-    const id = request.nextUrl.searchParams.get("id");
-    const deletedSupplier = await prisma.supplier.delete({
+    const { ids } = await request.json();
+    await prisma.supplier.deleteMany({
       where: {
-        id,
+        id: {
+          in: ids,
+        },
       },
     });
-    return NextResponse.json(deletedSupplier);
+    return NextResponse.json({ message: "Suppliers deleted successfully" });
   } catch (error) {
     console.log(error);
     return NextResponse.json(
       {
         error,
-        message: "Failed to Delete Supplier",
+        message: "Failed to Delete Suppliers",
       },
       {
         status: 500,

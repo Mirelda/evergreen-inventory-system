@@ -17,7 +17,7 @@ export default function RegisterForm() {
   console.log(emailErr);
   async function onSubmit(data) {
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
       setLoading(true);
       const response = await fetch(`${baseUrl}/api/user`, {
         method: "POST",
