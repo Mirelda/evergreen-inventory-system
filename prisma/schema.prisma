@@ -116,6 +116,7 @@ model Item {
   sku          String?
   barcode      String?
   quantity     Int      @default(0)
+  reOrderPoint Int      @default(0)
   unitId       String   @db.ObjectId
   unit         Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
   brandId      String   @db.ObjectId

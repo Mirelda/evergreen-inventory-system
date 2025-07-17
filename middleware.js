@@ -13,19 +13,17 @@ export default withAuth(
     if (token) {
       const { role } = token;
       
-      // ADMIN-only routes (User Management)
-      if (pathname.startsWith("/dashboard/users")) {
+      // ADMIN-only routes
+      const adminOnlyRoutes = ["/dashboard/users", "/dashboard/documents"];
+      if (adminOnlyRoutes.some(path => pathname.startsWith(path))) {
         if (role !== "ADMIN") {
           return NextResponse.redirect(new URL("/dashboard?error=unauthorized", req.url));
         }
       }
 
-      // MANAGER and ADMIN only routes (Reports and Deleting things which are validated at API level)
+      // MANAGER and ADMIN only routes
       const managerAdminRoutes = [
         "/dashboard/reports",
-        "/dashboard/documents", // Assuming documents are sensitive
-        "/dashboard/purchases",
-        "/dashboard/integrations",
       ];
       if (managerAdminRoutes.some(path => pathname.startsWith(path))) {
         if (role !== "ADMIN" && role !== "MANAGER") {

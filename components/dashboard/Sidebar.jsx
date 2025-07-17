@@ -103,39 +103,23 @@ function Sidebar({ showSidebar, setShowSidebar, collapsed, setCollapsed }) {
         </Link>
         
         {(userRole === "ADMIN" || userRole === "MANAGER") && (
+          <Link className={`flex items-center rounded-md transition-all h-12 w-full hover:bg-slate-700 ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`} href="/dashboard/reports" onClick={handleMobileClose}>
+            <BarChart4 className="w-4 h-4" />
+            {!collapsed && <span>Reports</span>}
+          </Link>
+        )}
+
+        {userRole === "ADMIN" && (
           <>
-            <Link
-              className={`flex items-center rounded-md transition-all h-12 w-full hover:bg-slate-700 ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`}
-              href="/dashboard/purchases"
-              onClick={handleMobileClose}
-            >
-              <ShoppingBag className="w-4 h-4" />
-              {!collapsed && <span>Purchases</span>}
-            </Link>
-            <Link
-              className={`flex items-center rounded-md transition-all h-12 w-full hover:bg-slate-700 ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`}
-              href="/dashboard/integrations"
-              onClick={handleMobileClose}
-            >
-              <Cable className="w-4 h-4" />
-              {!collapsed && <span>Integrations</span>}
-            </Link>
-            <Link className={`flex items-center rounded-md transition-all h-12 w-full hover:bg-slate-700 ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`} href="/dashboard/reports" onClick={handleMobileClose}>
-              <BarChart4 className="w-4 h-4" />
-              {!collapsed && <span>Reports</span>}
-            </Link>
             <Link className={`flex items-center rounded-md transition-all h-12 w-full hover:bg-slate-700 ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`} href="/dashboard/documents" onClick={handleMobileClose}>
               <Files className="w-4 h-4" />
               {!collapsed && <span>Documents</span>}
             </Link>
+            <Link className={`flex items-center rounded-md transition-all h-12 w-full hover:bg-slate-700 ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`} href="/dashboard/users" onClick={handleMobileClose}>
+              <Users className="w-4 h-4" />
+              {!collapsed && <span>Users</span>}
+            </Link>
           </>
-        )}
-
-        {userRole === "ADMIN" && (
-           <Link className={`flex items-center rounded-md transition-all h-12 w-full hover:bg-slate-700 ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`} href="/dashboard/users" onClick={handleMobileClose}>
-             <Users className="w-4 h-4" />
-             {!collapsed && <span>Users</span>}
-           </Link>
         )}
       </nav>
       <SubscriptionCard />
