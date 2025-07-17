@@ -1,75 +1,106 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Evergreen Inventory - Inventory Management System
 
-## Getting Started
+A modern inventory management platform built with Next.js, Prisma (with MongoDB), and NextAuth.js. It features a role-based authentication system and detailed inventory tracking.
 
-First, run the development server:
+## Project Structure
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+evergreen-inventory/
+├── app/
+│   ├── (back-office)/ # Management dashboard UI
+│   ├── api/           # API endpoints
+│   ├── login/         # Login page
+│   └── register/      # Registration page
+├── components/        # Reusable React components
+├── lib/               # Helper functions and configurations (database, auth)
+├── prisma/            # Database schema (schema.prisma)
+└── public/            # Static assets (images, etc.)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Technologies
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+*   **Framework:** Next.js 15 (with App Router)
+*   **Database:** MongoDB
+*   **ORM:** Prisma
+*   **Authentication:** NextAuth.js
+*   **Styling:** Tailwind CSS & Sass
+*   **UI Components:** Radix UI
+*   **Form Management:** React Hook Form
+*   **File Uploads:** UploadThing
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Setup and Launch
 
-## Authorization Architecture
+1.  Navigate to the project directory:
+    ```bash
+    cd evergreen-inventory
+    ```
 
-This project implements a Role-Based Access Control (RBAC) system to manage user permissions. The system is built using NextAuth.js, Prisma, and MongoDB.
+2.  Install the required packages:
+    ```bash
+    npm install
+    ```
 
-### Core Technologies
+3.  Create a file named `.env` and fill in the following variables with your own MongoDB connection details:
 
-- **NextAuth.js**: Handles user authentication, including sign-in, sign-out, and session management.
-- **Prisma**: Serves as the ORM for database interactions. User and role data are stored in a MongoDB database.
-- **MongoDB**: A flexible and scalable NoSQL database used for data persistence.
+    ```env
+    # Database Configuration
+    DATABASE_URL="mongodb+srv://<user>:<password>@<cluster-url>/<db-name>?retryWrites=true&w=majority"
 
-### Role Hierarchy
+    # NextAuth.js Configuration
+    NEXTAUTH_SECRET="your_secret_key_here"
+    NEXTAUTH_URL="http://localhost:3000"
 
-The system defines three primary user roles:
+    # UploadThing Configuration
+    UPLOADTHING_SECRET="your_uploadthing_secret"
+    UPLOADTHING_APP_ID="your_uploadthing_app_id"
+    ```
 
-1.  **`ADMIN`**: The highest-level role with full system access.
-    - Can manage all system settings and features.
-    - Has full control over user management (assigning roles, deleting users).
-    - Inherits all permissions from `MANAGER` and `STAFF`.
+4.  Start the development server:
+    ```bash
+    npm run dev
+    ```
 
-2.  **`MANAGER`**: An intermediate-level role for administrative tasks.
-    - Manages inventory, sales, and purchases.
-    - Can access reports and documents.
-    - Has all permissions of the `STAFF` role, with the additional ability to delete records.
+    When the server starts, it will synchronize with the Prisma database, and your application will be running at `http://localhost:3000`.
 
-3.  **`STAFF`**: The base-level user role.
-    - New users are assigned this role by default upon registration.
-    - Can perform essential tasks like creating and editing inventory items and sales.
-    - Can manage their own user settings.
+## Role-Based Authentication System
 
-### Authorization Flow
+#### User Roles
 
-Authorization is enforced on both the server-side (via middleware) and the client-side (via UI components).
+*   **STAFF (Default):** Can perform basic inventory operations.
+*   **MANAGER:** Has user management and broader permissions.
+*   **ADMIN:** Has full control over the entire platform.
 
-- **`middleware.js`**: This file protects routes based on user roles. It intercepts requests to secured pages and verifies the user's session and role. Unauthorized access attempts are redirected to the login page or an error page.
+#### Authentication Flow
 
-- **Dynamic UI Rendering**:
-    - **`Sidebar.jsx`**: Navigation links in the sidebar are dynamically rendered based on the user's role. For example, a `STAFF` user will only see links to pages they are permitted to access.
-    - **`DataTable.jsx`**: Action buttons within data tables (e.g., "Add New," "Edit," "Delete") are conditionally rendered according to the user's permissions. This prevents users from seeing or attempting actions they are not authorized to perform.
+1.  Users register with the `STAFF` role by default.
+2.  Users with `ADMIN` or `MANAGER` roles can update the roles of other users.
+3.  Access to pages and API endpoints is restricted based on the user's role using `middleware.js` and NextAuth.js callbacks.
 
-## Learn More
+## API Endpoints (Examples)
 
-To learn more about Next.js, take a look at the following resources:
+The project provides RESTful API endpoints using the Next.js App Router structure.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+#### Authentication
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+*   **User Registration:** `POST /api/register`
+*   **User Login:** `POST /api/auth/callback/credentials` (Handled by NextAuth)
+*   **Session Info:** `GET /api/auth/session` (Handled by NextAuth)
 
-## Deploy on Vercel
+#### Inventory Management
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+*   **List/Add Items:** `GET /api/items`, `POST /api/items`
+*   **Get/Update/Delete a Single Item:** `GET /api/items/[id]`, `PATCH /api/items/[id]`, `DELETE /api/items/[id]`
+*   **Categories:** `GET /api/categories`, `POST /api/categories`
+*   **Brands:** `GET /api/brands`, `POST /api/brands`
+*   **Stock Adjustments:** `POST /api/adjustments/add`, `POST /api/adjustments/transfer`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Database Schema
+
+Database models are defined in the `prisma/schema.prisma` file. The main models are:
+
+*   `User`: User information and roles.
+*   `Item`: Products in the inventory (stock quantity, price, category, etc.).
+*   `Category`, `Brand`, `Unit`: Helper models for organizing products.
+*   `Warehouse`: Warehouses where stock is kept.
+*   `AddStockAdjustment`, `TransferStockAdjustment`: Stock entry and transfer records.
+*   `Sale`: Sales transactions.
