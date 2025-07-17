@@ -14,32 +14,36 @@ function Dashboard() {
     overview: null,
     lowStock: [],
     inventoryValue: null,
-    stockMovement: null
+    stockMovement: null,
+    sales: []
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchAnalyticsData = async () => {
       try {
-        const [overviewRes, lowStockRes, inventoryValueRes, stockMovementRes] = await Promise.all([
+        const [overviewRes, lowStockRes, inventoryValueRes, stockMovementRes, salesRes] = await Promise.all([
           fetch('/api/analytics/overview'),
           fetch('/api/analytics/low-stock'),
           fetch('/api/analytics/inventory-value'),
-          fetch('/api/analytics/stock-movement')
+          fetch('/api/analytics/stock-movement'),
+          fetch('/api/sales')
         ]);
 
-        const [overview, lowStock, inventoryValue, stockMovement] = await Promise.all([
+        const [overview, lowStock, inventoryValue, stockMovement, sales] = await Promise.all([
           overviewRes.json(),
           lowStockRes.json(),
           inventoryValueRes.json(),
-          stockMovementRes.json()
+          stockMovementRes.json(),
+          salesRes.json()
         ]);
 
         setAnalyticsData({
           overview,
           lowStock,
           inventoryValue,
-          stockMovement
+          stockMovement,
+          sales
         });
       } catch (error) {
         console.error('Error fetching analytics data:', error);
@@ -123,6 +127,34 @@ function Dashboard() {
           change="+2"
           changeType="positive"
           color="purple"
+        />
+      </div>
+
+      {/* Sales Analytics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <AnalyticsCard
+          title="Total Sales"
+          value={analyticsData.sales?.length || 0}
+          change={`+${analyticsData.sales?.length || 0}`}
+          changeType="positive"
+          color="indigo"
+        />
+        <AnalyticsCard
+          title="Total Revenue"
+          value={`$${(analyticsData.sales?.reduce((sum, sale) => sum + sale.totalAmount, 0) || 0).toFixed(2)}`}
+          change={`+$${(analyticsData.sales?.reduce((sum, sale) => sum + sale.totalAmount, 0) || 0).toFixed(2)}`}
+          changeType="positive"
+          color="green"
+        />
+        <AnalyticsCard
+          title="Today's Sales"
+          value={analyticsData.sales?.filter(sale => {
+            const today = new Date().toDateString();
+            return new Date(sale.createdAt).toDateString() === today;
+          }).length || 0}
+          change="Today"
+          changeType="neutral"
+          color="orange"
         />
       </div>
 

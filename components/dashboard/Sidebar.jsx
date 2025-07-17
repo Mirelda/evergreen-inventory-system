@@ -51,45 +51,6 @@ function Sidebar({ showSidebar, setShowSidebar, collapsed, setCollapsed }) {
     },
   ];
 
-  const salesLinks = [
-    {
-      title: "Customers",
-      href: "#",
-    },
-    {
-      title: "Sales Orders",
-      href: "#",
-    },
-    {
-      title: "Packages",
-      href: "#",
-    },
-    {
-      title: "Shipments",
-      href: "#",
-    },
-    {
-      title: "Invoices",
-      href: "#",
-    },
-    {
-      title: "Sales Receipts",
-      href: "#",
-    },
-    {
-      title: "Payment Received",
-      href: "#",
-    },
-    {
-      title: "Sales Returns",
-      href: "#",
-    },
-    {
-      title: "Credit Notes",
-      href: "#",
-    },
-  ];
-
   return (
     <aside
       className={`
@@ -129,26 +90,28 @@ function Sidebar({ showSidebar, setShowSidebar, collapsed, setCollapsed }) {
           onLinkClick={handleMobileClose}
           collapsed={collapsed}
         />
-        <SidebarDropdownLink
-          title={!collapsed ? "Sales" : ""}
-          items={salesLinks}
-          icon={ShoppingBasket}
-          onLinkClick={handleMobileClose}
-          collapsed={collapsed}
-        />
-        <button className={`flex items-center rounded-md transition-all h-12 w-full ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`}>
+        <Link
+          className={`flex items-center rounded-md transition-all h-12 w-full hover:bg-slate-700
+            ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`}
+          href="/dashboard/sales"
+          onClick={handleMobileClose}
+        >
+          <ShoppingBasket className="w-5 h-5" />
+          {!collapsed && <span>Sales</span>}
+        </Link>
+        <Link className={`flex items-center rounded-md transition-all h-12 w-full hover:bg-slate-700 ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`} href="#" onClick={handleMobileClose}>
           <ShoppingBag className="w-4 h-4" />
           {!collapsed && <span>Purchases</span>}
-        </button>
-        <Link className={`flex items-center rounded-md transition-all h-12 w-full ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`} href="#" onClick={handleMobileClose}>
+        </Link>
+        <Link className={`flex items-center rounded-md transition-all h-12 w-full hover:bg-slate-700 ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`} href="#" onClick={handleMobileClose}>
           <Cable className="w-4 h-4" />
           {!collapsed && <span>Integrations</span>}
         </Link>
-        <Link className={`flex items-center rounded-md transition-all h-12 w-full ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`} href="#" onClick={handleMobileClose}>
+        <Link className={`flex items-center rounded-md transition-all h-12 w-full hover:bg-slate-700 ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`} href="#" onClick={handleMobileClose}>
           <BarChart4 className="w-4 h-4" />
           {!collapsed && <span>Reports</span>}
         </Link>
-        <Link className={`flex items-center rounded-md transition-all h-12 w-full ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`} href="#" onClick={handleMobileClose}>
+        <Link className={`flex items-center rounded-md transition-all h-12 w-full hover:bg-slate-700 ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`} href="#" onClick={handleMobileClose}>
           <Files className="w-4 h-4" />
           {!collapsed && <span>Documents</span>}
         </Link>

@@ -128,6 +128,8 @@ model Item {
   warehouseId  String?
   addStockAdjustments      AddStockAdjustment[]
   transferStockAdjustments TransferStockAdjustment[]
+  sales                    SaleItem[]
+  returns                  ReturnItem[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
@@ -156,4 +158,44 @@ model TransferStockAdjustment {
   notes                 String?
   createdAt             DateTime   @default(now())
   updatedAt             DateTime   @updatedAt
+}
+
+model Sale {
+  id              String     @id @default(auto()) @map("_id") @db.ObjectId
+  referenceNumber String     @unique
+  totalAmount     Float
+  items           SaleItem[]
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+}
+
+model SaleItem {
+  id           String @id @default(auto()) @map("_id") @db.ObjectId
+  saleId       String @db.ObjectId
+  sale         Sale   @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  itemId       String @db.ObjectId
+  item         Item   @relation(fields: [itemId], references: [id], onDelete: Restrict)
+  quantitySold Int
+  pricePerItem Float
+
+  @@unique([saleId, itemId])
+}
+
+model StockReturn {
+  id              String       @id @default(auto()) @map("_id") @db.ObjectId
+  referenceNumber String       @unique
+  totalAmount     Float
+  items           ReturnItem[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+model ReturnItem {
+  id               String      @id @default(auto()) @map("_id") @db.ObjectId
+  returnId         String      @db.ObjectId
+  return           StockReturn @relation(fields: [returnId], references: [id], onDelete: Cascade)
+  itemId           String      @db.ObjectId
+  item             Item        @relation(fields: [itemId], references: [id], onDelete: Restrict)
+  quantityReturned Int
+  reason           String?
 }
