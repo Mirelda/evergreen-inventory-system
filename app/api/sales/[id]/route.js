@@ -1,7 +1,18 @@
 import prisma from "@/lib/db";
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/authOptions";
 
 export async function DELETE(request, { params }) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || (session.user.role !== 'ADMIN' && session.user.role !== 'MANAGER')) {
+    return NextResponse.json(
+      { message: "Unauthorized: You do not have permission to delete this sale." },
+      { status: 403 }
+    );
+  }
+
   try {
     const { id } = params;
 

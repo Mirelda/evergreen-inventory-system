@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Search, Edit, Trash2, Plus, ChevronDown, ChevronUp, Download, CheckSquare, Square, Filter, X } from "lucide-react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 function DataTable({
   title = "Data Table",
@@ -24,7 +25,16 @@ function DataTable({
   onBulkExport,
   enableAdvancedFiltering = false,
   filters = [],
+  resourceName,
 }) {
+  const { data: session } = useSession();
+  const userRole = session?.user?.role;
+
+  // Permissions based on the new role definitions
+  const canCreate = userRole === 'ADMIN' || userRole === 'MANAGER' || userRole === 'STAFF';
+  const canUpdate = userRole === 'ADMIN' || userRole === 'MANAGER' || userRole === 'STAFF';
+  const canDelete = userRole === 'ADMIN' || userRole === 'MANAGER';
+
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
   const [currentPage, setCurrentPage] = useState(1);
@@ -332,74 +342,28 @@ function DataTable({
   return (
     <div className={`bg-white rounded-lg shadow-sm border border-gray-200 ${className}`}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border-b border-gray-200">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2 sm:mb-0">{title}</h2>
-        
-        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder={searchPlaceholder}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-64"
-            />
-          </div>
-          
-          {/* Advanced Filter Toggle */}
-          {enableAdvancedFiltering && (
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                getActiveFiltersCount() > 0
-                  ? 'bg-blue-100 text-blue-700 border border-blue-300'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <Filter className="w-4 h-4" />
-              Filters
-              {getActiveFiltersCount() > 0 && (
-                <span className="bg-blue-600 text-white text-xs rounded-full px-2 py-1">
-                  {getActiveFiltersCount()}
-                </span>
+      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-t-lg border-b">
+          <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
+          <div className="flex items-center gap-2">
+              {onAdd && canCreate && (
+                  <button
+                      onClick={onAdd}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-blue-700 transition-colors"
+                  >
+                      <Plus className="w-4 h-4" />
+                      {addButtonText}
+                  </button>
               )}
-            </button>
-          )}
-          
-          {/* Export Button */}
-          {enableExport && (
-            <button
-              onClick={handleExport}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-            >
-              <Download className="w-4 h-4" />
-              Export CSV
-            </button>
-          )}
-          
-          {/* Add Button */}
-          {onAdd && (
-            <button
-              onClick={onAdd}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              {addButtonText}
-            </button>
-          )}
-          
-          {addButtonLink && (
-            <Link
-              href={addButtonLink}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              {addButtonText}
-            </Link>
-          )}
-        </div>
+              {enableExport && (
+                  <button
+                      onClick={handleExport}
+                      className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-green-700 transition-colors"
+                  >
+                      <Download className="w-4 h-4" />
+                      Export CSV
+                  </button>
+              )}
+          </div>
       </div>
 
       {/* Bulk Actions Bar */}
@@ -625,34 +589,30 @@ function DataTable({
                 </td>
               </tr>
             ) : (
-              currentItems.map((item, index) => (
-                <tr key={item.id || index} className="hover:bg-gray-50">
+              currentItems.map((item, itemIndex) => (
+                <tr key={item.id || itemIndex} className="border-b border-gray-200 hover:bg-gray-50">
                   {enableBulkActions && (
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <button
-                        onClick={() => handleSelectItem(item.id)}
-                        className="flex items-center justify-center w-4 h-4"
-                      >
-                        {selectedItems.has(item.id) ? (
-                          <CheckSquare className="w-4 h-4 text-blue-600" />
-                        ) : (
-                          <Square className="w-4 h-4 text-gray-400" />
-                        )}
-                      </button>
+                    <td className="py-3 px-4 text-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedItems.has(item.id)}
+                        onChange={() => handleSelectItem(item.id)}
+                        className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"
+                      />
                     </td>
                   )}
-                  {columns.map((column) => (
-                    <td key={column.key} className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatCellValue(
-                        column.accessor ? column.accessor(item) : item[column.key],
-                        column
-                      )}
-                    </td>
-                  ))}
-                  {(onEdit || onDelete) && (
+                  {columns.map((column, colIndex) => {
+                    const value = column.accessor ? column.accessor(item) : item[column.key];
+                    return (
+                      <td key={colIndex} className="py-3 px-4 text-sm text-gray-700">
+                        {column.render ? column.render(item) : formatCellValue(value, column)}
+                      </td>
+                    );
+                  })}
+                  {(onEdit || onDelete) && (canUpdate || canDelete) && (
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                       <div className="flex items-center gap-2">
-                        {onEdit && (
+                        {onEdit && canUpdate && (
                           <button
                             onClick={() => onEdit(item)}
                             className="text-blue-600 hover:text-blue-800 transition-colors"
@@ -661,7 +621,7 @@ function DataTable({
                             <Edit className="w-4 h-4" />
                           </button>
                         )}
-                        {onDelete && (
+                        {onDelete && canDelete && (
                           <button
                             onClick={() => onDelete(item)}
                             className="text-red-600 hover:text-red-800 transition-colors"

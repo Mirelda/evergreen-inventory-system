@@ -6,20 +6,22 @@ import {
   ChevronLeft,
   Files,
   Home,
-  PlusCircle,
   ShoppingBag,
   ShoppingBasket,
   Store,
+  Users,
   X,
 } from "lucide-react";
 import Link from "next/link";
 import SubscriptionCard from "./SubscriptionCard";
-
-import CollapsibleLink from "./CollapsibleLink";
+import { useSession } from "next-auth/react";
 import SidebarDropdownLink from "./SidebarDropdownLink";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 function Sidebar({ showSidebar, setShowSidebar, collapsed, setCollapsed }) {
+  const { data: session } = useSession();
+  const userRole = session?.user?.role;
+
   const handleMobileClose = () => {
     if (window.innerWidth < 1024) setShowSidebar(false);
   };
@@ -99,22 +101,42 @@ function Sidebar({ showSidebar, setShowSidebar, collapsed, setCollapsed }) {
           <ShoppingBasket className="w-5 h-5" />
           {!collapsed && <span>Sales</span>}
         </Link>
-        <Link className={`flex items-center rounded-md transition-all h-12 w-full hover:bg-slate-700 ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`} href="#" onClick={handleMobileClose}>
-          <ShoppingBag className="w-4 h-4" />
-          {!collapsed && <span>Purchases</span>}
-        </Link>
-        <Link className={`flex items-center rounded-md transition-all h-12 w-full hover:bg-slate-700 ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`} href="#" onClick={handleMobileClose}>
-          <Cable className="w-4 h-4" />
-          {!collapsed && <span>Integrations</span>}
-        </Link>
-        <Link className={`flex items-center rounded-md transition-all h-12 w-full hover:bg-slate-700 ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`} href="#" onClick={handleMobileClose}>
-          <BarChart4 className="w-4 h-4" />
-          {!collapsed && <span>Reports</span>}
-        </Link>
-        <Link className={`flex items-center rounded-md transition-all h-12 w-full hover:bg-slate-700 ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`} href="#" onClick={handleMobileClose}>
-          <Files className="w-4 h-4" />
-          {!collapsed && <span>Documents</span>}
-        </Link>
+        
+        {(userRole === "ADMIN" || userRole === "MANAGER") && (
+          <>
+            <Link
+              className={`flex items-center rounded-md transition-all h-12 w-full hover:bg-slate-700 ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`}
+              href="/dashboard/purchases"
+              onClick={handleMobileClose}
+            >
+              <ShoppingBag className="w-4 h-4" />
+              {!collapsed && <span>Purchases</span>}
+            </Link>
+            <Link
+              className={`flex items-center rounded-md transition-all h-12 w-full hover:bg-slate-700 ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`}
+              href="/dashboard/integrations"
+              onClick={handleMobileClose}
+            >
+              <Cable className="w-4 h-4" />
+              {!collapsed && <span>Integrations</span>}
+            </Link>
+            <Link className={`flex items-center rounded-md transition-all h-12 w-full hover:bg-slate-700 ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`} href="/dashboard/reports" onClick={handleMobileClose}>
+              <BarChart4 className="w-4 h-4" />
+              {!collapsed && <span>Reports</span>}
+            </Link>
+            <Link className={`flex items-center rounded-md transition-all h-12 w-full hover:bg-slate-700 ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`} href="/dashboard/documents" onClick={handleMobileClose}>
+              <Files className="w-4 h-4" />
+              {!collapsed && <span>Documents</span>}
+            </Link>
+          </>
+        )}
+
+        {userRole === "ADMIN" && (
+           <Link className={`flex items-center rounded-md transition-all h-12 w-full hover:bg-slate-700 ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}`} href="/dashboard/users" onClick={handleMobileClose}>
+             <Users className="w-4 h-4" />
+             {!collapsed && <span>Users</span>}
+           </Link>
+        )}
       </nav>
       <SubscriptionCard />
       {/* Masaüstünde daralt/expand butonu */}

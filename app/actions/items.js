@@ -1,6 +1,7 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import { revalidatePath } from "next/cache";
+import prisma from "@/lib/db";
 
 export async function deleteAllItems() {
   try {

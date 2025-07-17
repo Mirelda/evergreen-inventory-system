@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 import { data } from "autoprefixer";
 import { NextResponse } from "next/server";
 
