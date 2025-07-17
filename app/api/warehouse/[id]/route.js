@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/authOptions';
 
 const prisma = new PrismaClient();
 
@@ -95,6 +97,15 @@ export async function PUT(request, { params }) {
 }
 
 export async function DELETE(request, { params }) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || (session.user.role !== 'ADMIN' && session.user.role !== 'MANAGER')) {
+    return NextResponse.json(
+      { message: "Unauthorized: You do not have permission to delete this warehouse." },
+      { status: 403 }
+    );
+  }
+
   try {
     const id = await params.id;
     
