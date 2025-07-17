@@ -48,17 +48,18 @@ enum Role {
 }
 
 model User {
-  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
   name          String?
-  email         String    @unique
+  email         String        @unique
   emailVerified DateTime?
   password      String?
   image         String?
-  role          Role      @default(STAFF)
+  role          Role          @default(STAFF)
   accounts      Account[]
   sessions      Session[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  activityLogs  ActivityLog[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 }
 
 model VerificationToken {
@@ -205,4 +206,46 @@ model ReturnItem {
   item             Item        @relation(fields: [itemId], references: [id], onDelete: Restrict)
   quantityReturned Int
   reason           String?
+}
+
+enum ActivityLevel {
+  INFO
+  WARNING
+  ERROR
+}
+
+enum ActivityCategory {
+  AUTHENTICATION
+  USER
+  ITEM
+  INVENTORY
+  SALES
+  PURCHASE
+  DATABASE
+  SYSTEM
+  API
+}
+
+model ActivityLog {
+  id          String           @id @default(auto()) @map("_id") @db.ObjectId
+  timestamp   DateTime         @default(now())
+  level       ActivityLevel
+  category    ActivityCategory
+  action      String           // e.g., "CREATE", "UPDATE", "DELETE", "LOGIN", "LOGOUT"
+  message     String           // Human readable message
+  details     String?          // Additional details (JSON string)
+  userId      String?          @db.ObjectId
+  user        User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  ip          String?          // IP address
+  userAgent   String?          // User agent string
+  entityType  String?          // e.g., "Item", "Sale", "User"
+  entityId    String?          // ID of the affected entity
+  oldValues   String?          // Previous values (JSON string)
+  newValues   String?          // New values (JSON string)
+  createdAt   DateTime         @default(now())
+
+  @@index([timestamp])
+  @@index([level])
+  @@index([category])
+  @@index([userId])
 }

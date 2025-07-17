@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { logItem, getClientInfo } from "@/lib/activityLogger";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/authOptions";
 
 const prisma = new PrismaClient();
 
@@ -33,6 +36,8 @@ export async function GET() {
 
 export async function POST(request) {
   try {
+    const session = await getServerSession(authOptions);
+    const { ip, userAgent } = getClientInfo(request);
     const data = await request.json();
 
     console.log("Received data:", data);
@@ -60,6 +65,23 @@ export async function POST(request) {
         warehouseId: data.warehouseId || null,
       },
     });
+
+    // Log the activity
+    await logItem(
+      'CREATE',
+      item.id,
+      item.title,
+      session?.user?.id,
+      ip,
+      userAgent,
+      null, // oldValues
+      {
+        title: item.title,
+        sku: item.sku,
+        quantity: item.quantity,
+        sellingPrice: item.sellingPrice
+      }
+    );
 
     console.log("Item created:", item);
     return NextResponse.json(item);
