@@ -108,7 +108,8 @@ export async function GET() {
         
         totalCost += itemCost;
         totalTax += itemTax;
-        totalProfit += (itemRevenue - itemCost - itemTax);
+        // Profit is revenue minus cost (tax is separate, not deducted from profit)
+        totalProfit += (itemRevenue - itemCost);
       });
     });
 
