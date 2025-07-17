@@ -59,6 +59,23 @@ export async function POST(request) {
       return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
     }
 
+    // Get current item to check available stock
+    const currentItem = await prisma.item.findUnique({
+      where: { id: itemId },
+      select: { quantity: true, title: true }
+    });
+
+    if (!currentItem) {
+      return NextResponse.json({ error: "Item not found." }, { status: 404 });
+    }
+
+    // Check if there's enough stock to transfer
+    if (currentItem.quantity < Number(transferStockQuantity)) {
+      return NextResponse.json({ 
+        error: `Insufficient stock. Available: ${currentItem.quantity}, Requested: ${transferStockQuantity}` 
+      }, { status: 400 });
+    }
+
     // Create transfer record
     const transfer = await prisma.transferStockAdjustment.create({
       data: {
@@ -71,10 +88,11 @@ export async function POST(request) {
       },
     });
 
-    // Note: In this current implementation, we don't update the item's global quantity
-    // since we're just transferring between warehouses. The global quantity remains the same.
-    // In a real-world scenario, you might want to track stock per warehouse separately.
-    // For now, we just record the transfer without changing the global stock quantity.
+    // Note: In a transfer operation, the global quantity remains the same
+    // because we're just moving stock between warehouses.
+    // The total company stock doesn't change.
+    // In a real-world scenario with per-warehouse stock tracking,
+    // we would decrease stock in giving warehouse and increase in receiving warehouse.
 
     return NextResponse.json(transfer, { status: 201 });
   } catch (error) {
