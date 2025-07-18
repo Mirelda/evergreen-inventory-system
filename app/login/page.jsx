@@ -12,7 +12,6 @@ export default function LoginPage() {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
@@ -22,23 +21,22 @@ export default function LoginPage() {
     setError("");
 
     try {
+      // Let NextAuth handle the redirect. It's more reliable for setting cookies.
       const result = await signIn("credentials", {
         email: formData.email,
         password: formData.password,
-        redirect: false,
+        callbackUrl: "/dashboard", // Redirect to dashboard on success
       });
 
+      // This part will likely not be reached if signIn redirects,
+      // but it's good practice to handle a failed signIn call that doesn't redirect.
       if (result?.error) {
         setError("Invalid email or password");
-      } else {
-        const session = await getSession();
-        if (session) {
-          router.push("/dashboard");
-        }
+        setLoading(false);
       }
     } catch (error) {
-      setError("Something went wrong");
-    } finally {
+      // This will catch network errors or other unexpected issues.
+      setError("An unexpected error occurred. Please try again.");
       setLoading(false);
     }
   };
@@ -118,17 +116,7 @@ export default function LoginPage() {
 
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-              />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                Remember me
-              </label>
+              {/* "Remember me" checkbox has been removed */}
             </div>
 
             <div className="text-sm">

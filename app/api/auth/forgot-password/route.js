@@ -17,6 +17,12 @@ export async function POST(request) {
       return NextResponse.json({ message: 'If your email is in our system, you will receive a password reset link.' }, { status: 200 });
     }
 
+    // Update user status to indicate password reset is pending
+    await db.user.update({
+      where: { id: user.id },
+      data: { status: 'PENDING_PASSWORD_RESET' },
+    });
+
     // 2. Generate a short-lived JWT
     const token = jwt.sign(
       { userId: user.id, email: user.email },
