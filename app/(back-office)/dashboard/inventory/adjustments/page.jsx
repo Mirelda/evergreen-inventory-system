@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import AdjustmentForm from "@/components/dashboard/AdjustmentForm";
 import DataTable from "@/components/ui/DataTable";
 
@@ -11,6 +12,8 @@ export default function AdjustmentsPage() {
   const [refresh, setRefresh] = useState(false);
   const [addAdjustments, setAddAdjustments] = useState([]);
   const [transferAdjustments, setTransferAdjustments] = useState([]);
+  const searchParams = useSearchParams();
+  const preSelectedItemId = searchParams.get('itemId');
 
   useEffect(() => {
     // Fetch items and warehouses
@@ -93,6 +96,15 @@ export default function AdjustmentsPage() {
     <div className="p-4 lg:p-6">
       <h1 className="text-2xl font-bold mb-6">Stock Adjustments</h1>
       
+      {/* Show info message if item is pre-selected */}
+      {preSelectedItemId && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <p className="text-blue-800">
+            <strong>📦 Quick Add Stock:</strong> You can quickly add stock for the selected low-stock item below.
+          </p>
+        </div>
+      )}
+      
       {/* Tab Buttons */}
       <div className="flex gap-2 mb-6">
         <button
@@ -124,6 +136,7 @@ export default function AdjustmentsPage() {
             type="add"
             items={items}
             warehouses={warehouses}
+            preSelectedItemId={preSelectedItemId}
             onSuccess={() => setRefresh(r => !r)}
           />
         ) : (
@@ -131,6 +144,7 @@ export default function AdjustmentsPage() {
             type="transfer"
             items={items}
             warehouses={warehouses}
+            preSelectedItemId={preSelectedItemId}
             onSuccess={() => setRefresh(r => !r)}
           />
         )}

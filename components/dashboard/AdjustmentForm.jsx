@@ -1,12 +1,13 @@
+"use client";
 import { useState } from "react";
 import SelectInput from "@/components/formInputs/SelectInput";
 import TextInput from "@/components/formInputs/TextInput";
 import TextAreaInput from "@/components/formInputs/TextAreaInput";
 import SubmitButton from "@/components/formInputs/SubmitButton";
 
-export default function AdjustmentForm({ type = "add", items = [], warehouses = [], onSuccess }) {
+export default function AdjustmentForm({ type = "add", items = [], warehouses = [], preSelectedItemId = null, onSuccess }) {
   const [form, setForm] = useState({
-    itemId: "",
+    itemId: preSelectedItemId || "",
     warehouseId: "",
     givingWarehouseId: "",
     receivingWarehouseId: "",

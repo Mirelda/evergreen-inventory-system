@@ -6,16 +6,31 @@ export default async function NewItem({ initialData = {}, isUpdate = false }) {
   const unitsData = getData("units");
   const brandsData = getData("brands");
   const warehousesData = getData("warehouse");
-  const suppliersData = getData("suppliers");
 
   // Parallel fetching
-  const [categories, units, brands, warehouses, suppliers] = await Promise.all([
+  const [categories, units, brands, warehouses] = await Promise.all([
     categoriesData,
     unitsData,
     brandsData,
     warehousesData,
-    suppliersData,
   ]);
+
+  // Transform data to the format expected by SelectInput ({value, label})
+  const transformedCategories = categories?.map(cat => ({
+    value: cat.id,
+    label: cat.title
+  })) || [];
+
+  const transformedUnits = units?.map(unit => ({
+    value: unit.id,
+    label: unit.title
+  })) || [];
+
+  const transformedBrands = brands?.map(brand => ({
+    value: brand.id,
+    label: brand.title
+  })) || [];
+
   return (
     <div>
       {/* Header */}
@@ -24,13 +39,11 @@ export default async function NewItem({ initialData = {}, isUpdate = false }) {
         href="/dashboard/inventory/items"
       />
       {/* Form */}
-      {/*  */}
       <CreateItemForm
-        categories={categories}
-        units={units}
-        brands={brands}
+        categories={transformedCategories}
+        units={transformedUnits}
+        brands={transformedBrands}
         warehouses={warehouses}
-        suppliers={suppliers}
         initialData={initialData}
         isUpdate={isUpdate}
       />

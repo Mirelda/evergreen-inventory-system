@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 
 import { 
   Database, 
@@ -599,7 +600,7 @@ function DatabaseBackupTab() {
       
     } catch (error) {
       console.error('Error generating report:', error);
-      alert('Failed to generate report');
+      toast.error('Failed to generate report');
     }
   };
 
@@ -631,15 +632,15 @@ function DatabaseBackupTab() {
           URL.revokeObjectURL(url);
         }
         
-        alert(`Backup created and downloaded successfully!\nSize: ${result.backup.size}\nDuration: ${result.backup.duration}\nFile: ${result.backup.filename}`);
+        toast.success(`Backup created and downloaded successfully! File: ${result.backup.filename}`);
         fetchBackupData(); // Refresh data
       } else {
         const error = await response.json();
-        alert(`Backup failed: ${error.error}`);
+        toast.error(`Backup failed: ${error.error}`);
       }
     } catch (error) {
       console.error('Error creating backup:', error);
-      alert('Failed to create backup');
+      toast.error('Failed to create backup');
     } finally {
       setCreating(false);
     }
@@ -662,14 +663,14 @@ function DatabaseBackupTab() {
 
       if (response.ok) {
         const result = await response.json();
-        alert(result.message);
+        toast.success(result.message);
       } else {
         const error = await response.json();
-        alert(`Restore failed: ${error.error}`);
+        toast.error(`Restore failed: ${error.error}`);
       }
     } catch (error) {
       console.error('Error restoring backup:', error);
-      alert('Failed to restore backup');
+      toast.error('Failed to restore backup');
     } finally {
       setRestoring(false);
     }

@@ -178,7 +178,8 @@ function Reports() {
               </thead>
               <tbody>
                 {lowStockItems.map((item, index) => (
-                  <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                  <tr key={index} className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
+                      onClick={() => window.open(`/dashboard/inventory/adjustments?itemId=${item.id}`, '_blank')}>
                     <td className="py-3 px-2 text-sm text-gray-900">{item.title}</td>
                     <td className="text-right py-3 px-2">
                       <span className="text-sm font-medium text-red-600">{item.quantity}</span>
