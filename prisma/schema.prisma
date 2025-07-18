@@ -47,6 +47,13 @@ enum Role {
   STAFF
 }
 
+enum UserStatus {
+  ACTIVE
+  PENDING_PASSWORD_RESET
+  SUSPENDED
+  DEACTIVATED
+}
+
 model User {
   id            String        @id @default(auto()) @map("_id") @db.ObjectId
   name          String?
@@ -55,6 +62,7 @@ model User {
   password      String?
   image         String?
   role          Role          @default(STAFF)
+  status        UserStatus    @default(ACTIVE)
   accounts      Account[]
   sessions      Session[]
   activityLogs  ActivityLog[]

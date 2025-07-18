@@ -27,13 +27,22 @@ export async function POST(request) {
       return NextResponse.json({ message: 'User not found.' }, { status: 404 });
     }
 
+    // Check if the new password is the same as the old one
+    const isSamePassword = await bcrypt.compare(password, user.password);
+    if (isSamePassword) {
+      return NextResponse.json({ message: 'New password cannot be the same as the old password.' }, { status: 400 });
+    }
+
     // 3. Hash the new password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 4. Update the user's password in the database
+    // 4. Update the user's password and status in the database
     await db.user.update({
       where: { id: userId },
-      data: { password: hashedPassword },
+      data: { 
+        password: hashedPassword,
+        status: 'ACTIVE' // Reactivate the account
+      },
     });
 
     return NextResponse.json({ message: 'Password has been reset successfully.' }, { status: 200 });
