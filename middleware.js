@@ -64,18 +64,10 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - login (login page)
-     * - register (register page)
-     * - forgot-password (password reset request page)
-     * - reset-password (password reset page)
-     */
-    "/((?!api|_next/static|_next/image|favicon.ico|login|register|forgot-password|reset-password).*)",
-  ],
+  /*
+   * Match all request paths under /dashboard.
+   * This protects all dashboard pages and their subpages,
+   * while leaving public pages like the landing page, login, and register accessible.
+   */
+  matcher: ["/dashboard/:path*"],
 }; 
