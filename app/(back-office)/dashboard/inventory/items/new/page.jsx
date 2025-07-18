@@ -18,7 +18,6 @@ function NewItem() {
   const [units, setUnits] = useState([]);
   const [brands, setBrands] = useState([]);
   const [warehouses, setWarehouses] = useState([]);
-  const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(false);
 
   // Fetch data from API on component mount
@@ -215,16 +214,7 @@ function NewItem() {
             placeholder="0.00"
           />
 
-          {/* Supplier */}
-          <SelectInput
-            name="supplierId"
-            label="Item Supplier"
-            register={register}
-            errors={errors}
-            isRequired={false}
-            className="w-full"
-            options={suppliers}
-          />
+
 
           {/* Re-Order Point */}
           <TextInput

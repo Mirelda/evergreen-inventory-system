@@ -7,6 +7,7 @@ import AnalyticsCard from "@/components/dashboard/AnalyticsCard";
 import ChartCard from "@/components/dashboard/ChartCard";
 import BarChart from "@/components/dashboard/BarChart";
 import PieChart from "@/components/dashboard/PieChart";
+import Link from "next/link";
 
 function Dashboard() {
   const { data: session } = useSession();
@@ -185,15 +186,20 @@ function Dashboard() {
           <h3 className="text-lg font-semibold mb-4 text-red-600">⚠️ Low Stock Alerts</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {analyticsData.lowStock.slice(0, 6).map((item, index) => (
-              <div key={index} className="border border-red-200 rounded-lg p-4 bg-red-50">
-                <h4 className="font-medium text-red-800">{item.title}</h4>
-                <p className="text-sm text-red-600">
-                  Quantity: {item.quantity} {item.unit?.abbreviation || 'units'}
-                </p>
-                <p className="text-xs text-red-500">
-                  Reorder Point: {item.reorderPoint} {item.unit?.abbreviation || 'units'}
-                </p>
-              </div>
+              <Link href={`/dashboard/inventory/adjustments?itemId=${item.id}`} key={item.id}>
+                <div className="border border-red-200 rounded-lg p-4 bg-red-50 hover:bg-red-100 transition-colors cursor-pointer">
+                  <h4 className="font-medium text-red-800">{item.title}</h4>
+                  <p className="text-sm text-red-600">
+                    Quantity: {item.quantity} {item.unit?.abbreviation || 'units'}
+                  </p>
+                  <p className="text-xs text-red-500">
+                    Reorder Point: {item.reorderPoint} {item.unit?.abbreviation || 'units'}
+                  </p>
+                  <p className="text-xs text-blue-600 font-medium mt-1">
+                    Click to add stock →
+                  </p>
+                </div>
+              </Link>
             ))}
           </div>
         </div>

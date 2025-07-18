@@ -93,7 +93,10 @@ export async function GET(request) {
       action: log.action,
       message: log.message,
       details: log.details || '',
-      user: log.user ? `${log.user.name} (${log.user.email})` : 'System',
+      user: log.user ? {
+        name: log.user.name,
+        email: log.user.email
+      } : null,
       ip: log.ip || '127.0.0.1',
       userAgent: log.userAgent || 'System'
     }));
