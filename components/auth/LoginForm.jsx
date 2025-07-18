@@ -17,29 +17,34 @@ export default function LoginForm() {
   console.log(loading);
   async function onSubmit(data) {
     try {
-      console.log(data.email, data.password);
       setLoading(true);
       const loginData = await signIn("credentials", {
         ...data,
         redirect: false,
       });
-      console.log(loginData);
-      if (loginData?.error) {
-        setLoading(false);
-        setLoginErr("Sign-in error: Check your credentials");
-        // toast.error("Sign-in error: Check your credentials");
-      } else {
+
+      if (loginData.ok) {
         // Sign-in was successful
         toast.success("Login Successful");
-        reset();
-        router.push("/dashboard/home/overview");
+        router.push("/dashboard/home");
+        // No need to call reset() as the component will unmount
+      } else {
+        // Sign-in failed
+        setLoading(false);
+        const errorMessage = loginData.error || "Invalid credentials. Please try again.";
+        // Map common NextAuth errors to more user-friendly messages
+        if (errorMessage.includes("CredentialsSignin")) {
+          toast.error("Invalid email or password.");
+        } else {
+          toast.error(errorMessage);
+        }
       }
     } catch (error) {
       setLoading(false);
-      console.error("Network Error:", error);
-      // toast.error("Its seems something is wrong with your Network");
+      console.error("Network or unexpected error:", error);
+      toast.error("An unexpected error occurred. Please check your network and try again.");
     }
-  }
+}
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-6">
