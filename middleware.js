@@ -71,9 +71,11 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - login
-     * - register
+     * - login (login page)
+     * - register (register page)
+     * - forgot-password (password reset request page)
+     * - reset-password (password reset page)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|login|register).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|login|register|forgot-password|reset-password).*)",
   ],
 }; 
