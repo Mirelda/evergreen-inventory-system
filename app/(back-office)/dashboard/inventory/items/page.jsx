@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 
 function Items() {
   const [items, setItems] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const router = useRouter();
@@ -15,12 +17,21 @@ function Items() {
     const fetchItems = async () => {
       try {
         setLoading(true);
-        const data = await getData('items');
-        setItems(data);
+        // Fetch all data in parallel
+        const [itemsData, categoriesData, brandsData] = await Promise.all([
+          getData('items'),
+          getData('categories'),
+          getData('brands'),
+        ]);
+        
+        setItems(itemsData);
+        setCategories(categoriesData);
+        setBrands(brandsData);
+        
         setError(null);
       } catch (err) {
-        setError('Failed to fetch items');
-        console.error('Error fetching items:', err);
+        setError('Failed to fetch data');
+        console.error('Error fetching data:', err);
       } finally {
         setLoading(false);
       }
@@ -153,40 +164,24 @@ function Items() {
   // Advanced filters configuration
   const filters = [
     {
-      key: "category",
+      key: "categoryId", // Changed from "category" to "categoryId" to match item property
       label: "Category",
       type: "select",
       accessor: (item) => item.category?.title,
-      options: [
-        { value: "Electronics", label: "Electronics" },
-        { value: "Clothing", label: "Clothing" },
-        { value: "Books", label: "Books" },
-        { value: "Home & Garden", label: "Home & Garden" },
-      ]
+      options: categories.map(cat => ({ value: cat.id, label: cat.title })),
     },
     {
-      key: "brand",
+      key: "brandId", // Changed from "brand" to "brandId"
       label: "Brand",
       type: "select",
       accessor: (item) => item.brand?.title,
-      options: [
-        { value: "Apple", label: "Apple" },
-        { value: "Samsung", label: "Samsung" },
-        { value: "Nike", label: "Nike" },
-        { value: "Adidas", label: "Adidas" },
-      ]
+      options: brands.map(brand => ({ value: brand.id, label: brand.title })),
     },
     {
       key: "sellingPrice",
       label: "Price Range",
       type: "numberRange",
       accessor: (item) => item.sellingPrice,
-    },
-    {
-      key: "quantity",
-      label: "Stock Range",
-      type: "numberRange",
-      accessor: (item) => item.quantity,
     },
     {
       key: "createdAt",
