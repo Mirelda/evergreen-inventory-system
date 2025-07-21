@@ -67,11 +67,6 @@ function Sales() {
     },
   ];
 
-  const handleEdit = (sale) => {
-    // Edit functionality could be added here
-    console.log('Edit sale:', sale);
-  };
-
   const handleDelete = async (sale) => {
     if (confirm(`Are you sure you want to delete sale "${sale.referenceNumber}"?`)) {
       try {
@@ -179,7 +174,6 @@ function Sales() {
         data={sales}
         columns={columns}
         searchPlaceholder="Search sales..."
-        onEdit={handleEdit}
         onDelete={handleDelete}
         onAdd={handleAdd}
         addButtonText="New Sale"
