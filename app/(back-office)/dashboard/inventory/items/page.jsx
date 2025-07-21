@@ -31,6 +31,17 @@ function Items() {
 
   const columns = [
     {
+      key: "imageUrl",
+      label: "Image",
+      render: (item) => (
+        item.imageUrl ? (
+          <img src={item.imageUrl} alt={item.title} className="w-10 h-10 object-cover rounded-md" />
+        ) : (
+          <span>No Image</span>
+        )
+      ),
+    },
+    {
       key: "title",
       label: "Title",
       sortable: true,
