@@ -30,7 +30,13 @@ function Sales() {
   }, []);
 
   // Calculate totals
-  const totalRevenue = sales.reduce((sum, sale) => sum + (sale.totalAmount || 0), 0);
+  const totalRevenue = sales.reduce((sum, sale) => {
+    const saleRevenue = sale.items.reduce((itemSum, saleItem) => {
+      return itemSum + (saleItem.quantitySold * saleItem.pricePerItem);
+    }, 0);
+    return sum + saleRevenue;
+  }, 0);
+
   const todaysSales = sales.filter(sale => {
     const today = new Date().toDateString();
     return new Date(sale.createdAt).toDateString() === today;
@@ -66,11 +72,6 @@ function Sales() {
       type: "date",
     },
   ];
-
-  const handleEdit = (sale) => {
-    // Edit functionality could be added here
-    console.log('Edit sale:', sale);
-  };
 
   const handleDelete = async (sale) => {
     if (confirm(`Are you sure you want to delete sale "${sale.referenceNumber}"?`)) {
@@ -179,7 +180,6 @@ function Sales() {
         data={sales}
         columns={columns}
         searchPlaceholder="Search sales..."
-        onEdit={handleEdit}
         onDelete={handleDelete}
         onAdd={handleAdd}
         addButtonText="New Sale"
