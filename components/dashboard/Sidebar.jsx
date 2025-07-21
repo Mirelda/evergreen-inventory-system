@@ -79,7 +79,7 @@ function Sidebar({ showSidebar, setShowSidebar, collapsed, setCollapsed }) {
           className={`flex items-center rounded-md transition-all h-12 w-full
             ${collapsed ? 'justify-center p-0' : 'space-x-2 p-2'}
             bg-blue-600 text-slate-50`}
-          href="/dashboard/home"
+          href="/dashboard/home/overview"
           onClick={handleMobileClose}
         >
           <Home className="w-5 h-5" />

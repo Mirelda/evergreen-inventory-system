@@ -21,6 +21,31 @@ import {
 
 function Documents() {
   const [activeTab, setActiveTab] = useState('overview');
+  const [systemStats, setSystemStats] = useState({
+    activeUsers: 0,
+    systemStatus: 'Checking...'
+  });
+  const [loadingStats, setLoadingStats] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/system/stats');
+        if (response.ok) {
+          const data = await response.json();
+          setSystemStats(data);
+        } else {
+          setSystemStats(prev => ({ ...prev, systemStatus: 'Offline' }));
+        }
+      } catch (error) {
+        console.error("Failed to fetch system stats", error);
+        setSystemStats(prev => ({ ...prev, systemStatus: 'Offline' }));
+      } finally {
+        setLoadingStats(false);
+      }
+    };
+    fetchStats();
+  }, []);
 
   const systemFeatures = [
     {
@@ -58,22 +83,25 @@ function Documents() {
             </div>
             <div>
               <p className="text-sm text-gray-600">System Status</p>
-              <p className="text-lg font-semibold text-green-600">Online</p>
+              <p className={`text-lg font-semibold ${systemStats.systemStatus === 'Online' ? 'text-green-600' : 'text-red-600'}`}>
+                {loadingStats ? 'Loading...' : systemStats.systemStatus}
+              </p>
             </div>
           </div>
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-              <HardDrive className="w-5 h-5 text-green-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Last Backup</p>
-              <p className="text-lg font-semibold text-gray-900">2 hours ago</p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                <HardDrive className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Last Backup</p>
+                <p className="text-lg font-semibold text-gray-900">2 hours ago</p>
+              </div>
             </div>
           </div>
-        </div>
+
 
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="flex items-center gap-3">
@@ -82,7 +110,9 @@ function Documents() {
             </div>
             <div>
               <p className="text-sm text-gray-600">Active Users</p>
-              <p className="text-lg font-semibold text-gray-900">3</p>
+              <p className="text-lg font-semibold text-gray-900">
+                {loadingStats ? '...' : systemStats.activeUsers}
+              </p>
             </div>
           </div>
         </div>

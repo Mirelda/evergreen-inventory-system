@@ -30,7 +30,13 @@ function Sales() {
   }, []);
 
   // Calculate totals
-  const totalRevenue = sales.reduce((sum, sale) => sum + (sale.totalAmount || 0), 0);
+  const totalRevenue = sales.reduce((sum, sale) => {
+    const saleRevenue = sale.items.reduce((itemSum, saleItem) => {
+      return itemSum + (saleItem.quantitySold * saleItem.pricePerItem);
+    }, 0);
+    return sum + saleRevenue;
+  }, 0);
+
   const todaysSales = sales.filter(sale => {
     const today = new Date().toDateString();
     return new Date(sale.createdAt).toDateString() === today;

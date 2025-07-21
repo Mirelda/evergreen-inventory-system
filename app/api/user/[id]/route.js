@@ -64,4 +64,56 @@ export async function PUT(request, { params }) {
       { status: 500 }
     );
   }
+}
+
+export async function DELETE(request, { params }) {
+  const session = await getServerSession(authOptions);
+
+  // 1. Check if user is an ADMIN
+  if (!session || session.user.role !== 'ADMIN') {
+    return NextResponse.json(
+      { message: "Unauthorized: You do not have permission to perform this action." },
+      { status: 403 }
+    );
+  }
+
+  try {
+    const { id } = params;
+
+    // 2. Prevent admin from deleting themselves
+    if (session.user.id === id) {
+      return NextResponse.json(
+        { message: "Error: Admins cannot delete their own account." },
+        { status: 400 }
+      );
+    }
+
+    // 3. Find the user to ensure they exist before deleting
+    const userToDelete = await prisma.user.findUnique({
+      where: { id },
+    });
+
+    if (!userToDelete) {
+      return NextResponse.json(
+        { message: "User not found." },
+        { status: 404 }
+      );
+    }
+
+    // 4. Delete the user
+    await prisma.user.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({
+      message: "User deleted successfully",
+    });
+
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    return NextResponse.json(
+      { message: "Failed to delete user." },
+      { status: 500 }
+    );
+  }
 } 

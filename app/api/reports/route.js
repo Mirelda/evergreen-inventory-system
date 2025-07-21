@@ -184,6 +184,19 @@ export async function GET() {
       item.reorderPoint && item.quantity <= item.reorderPoint
     ).sort((a, b) => a.quantity - b.quantity);
 
+    // Today's Sales Count
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todaysSalesCount = sales.filter(sale => new Date(sale.createdAt) >= today).length;
+
+    // Stock Movement (simplified: daily net change)
+    const stockMovement = {};
+    [...addAdjustments, ...transferAdjustments].forEach(adj => {
+      const date = adj.createdAt.toISOString().split('T')[0];
+      const quantity = adj.addStockQuantity || adj.transferStockQuantity || 0;
+      stockMovement[date] = (stockMovement[date] || 0) + quantity;
+    });
+
     return NextResponse.json({
       summary: {
         totalSales: Math.round(totalSales * 100) / 100,
@@ -194,7 +207,10 @@ export async function GET() {
         totalPurchaseQuantity,
         totalInventoryValue: Math.round(totalInventoryValue * 100) / 100,
         totalInventoryCost: Math.round(totalInventoryCost * 100) / 100,
-        profitMargin: totalSales > 0 ? Math.round(((totalProfit / totalSales) * 100) * 100) / 100 : 0
+        profitMargin: totalSales > 0 ? Math.round(((totalProfit / totalSales) * 100) * 100) / 100 : 0,
+        totalItemCount: items.length,
+        todaysSalesCount,
+        stockMovement: Object.entries(stockMovement).map(([date, quantity]) => ({ date, quantity })),
       },
       charts: {
         dailySales: Object.entries(dailySales).map(([date, amount]) => ({
