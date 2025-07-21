@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
+import { UTApi } from "uploadthing/server";
 
 const prisma = new PrismaClient();
+const utapi = new UTApi();
 
 export async function GET(request, { params }) {
   try {
@@ -107,6 +109,20 @@ export async function DELETE(request, { params }) {
 
   try {
     const { id } = params;
+
+    // First, find the item to get its imageUrl
+    const itemToDelete = await prisma.item.findUnique({
+      where: { id },
+      select: { imageUrl: true },
+    });
+
+    // If the item has an image, delete it from UploadThing
+    if (itemToDelete && itemToDelete.imageUrl) {
+      const fileKey = itemToDelete.imageUrl.substring(itemToDelete.imageUrl.lastIndexOf("/") + 1);
+      await utapi.deleteFiles(fileKey);
+    }
+
+    // Then, delete the item from the database
     const deletedItem = await prisma.item.delete({
       where: {
         id: id,
@@ -114,7 +130,7 @@ export async function DELETE(request, { params }) {
     });
 
     return NextResponse.json({
-      message: "Item deleted successfully",
+      message: "Item and associated image deleted successfully",
       item: deletedItem,
     });
   } catch (error) {

@@ -13,7 +13,6 @@ import { UploadDropzone } from "@uploadthing/react";
 import { getData } from "@/lib/utils";
 
 function NewItem() {
-  const [imageUrl, setImageUrl] = useState("");
   const [categories, setCategories] = useState([]);
   const [units, setUnits] = useState([]);
   const [brands, setBrands] = useState([]);
@@ -47,11 +46,30 @@ function NewItem() {
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      title: "",
+      sku: "",
+      barcode: "",
+      quantity: 0,
+      buyingPrice: 0,
+      sellingPrice: 0,
+      reOrderPoint: 0,
+      weight: 0,
+      taxRate: 0,
+      dimensions: "",
+      description: "",
+      notes: "",
+      imageUrl: "",
+    }
+  });
+
+  const imageUrl = watch("imageUrl");
 
   async function onSubmit(data) {
-    data.imageUrl = imageUrl;
     console.log(data);
     setLoading(true);
     try {
@@ -67,7 +85,6 @@ function NewItem() {
         console.log("Item created successfully:", result);
         setLoading(false);
         reset();
-        setImageUrl("");
         alert("Item created successfully!");
       } else {
         const errorData = await response.json();
@@ -314,8 +331,8 @@ function NewItem() {
               className="w-36 h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md px-4 py-2 transition-colors duration-200"
               endpoint="imageUploader"
               onClientUploadComplete={(res) => {
-                setImageUrl(res[0].ufsUrl);
-                console.log(res[0].ufsUrl);
+                setValue("imageUrl", res[0].url);
+                console.log(res[0].url);
                 alert("Upload Completed");
               }}
               onUploadError={(error) => {
