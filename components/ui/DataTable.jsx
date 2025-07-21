@@ -59,26 +59,38 @@ function DataTable({
     if (enableAdvancedFiltering && Object.keys(activeFilters).length > 0) {
       return filters.every((filter) => {
         const filterValue = activeFilters[filter.key];
-        if (!filterValue || filterValue === "") return true;
+        if (!filterValue || (typeof filterValue === 'object' && !filterValue.startDate && !filterValue.endDate && filterValue.min === undefined && filterValue.max === undefined)) return true;
 
         const itemValue = filter.accessor ? filter.accessor(item) : item[filter.key];
         
         switch (filter.type) {
           case "select":
             return itemValue === filterValue;
-          case "dateRange":
-            if (filterValue.startDate && filterValue.endDate) {
-              const itemDate = new Date(itemValue);
-              const startDate = new Date(filterValue.startDate);
-              const endDate = new Date(filterValue.endDate);
-              return itemDate >= startDate && itemDate <= endDate;
+          case "dateRange": {
+            const itemDate = new Date(itemValue);
+            const startDate = filterValue.startDate ? new Date(filterValue.startDate) : null;
+            const endDate = filterValue.endDate ? new Date(filterValue.endDate) : null;
+
+            if (startDate && !endDate) return itemDate >= startDate;
+            if (!startDate && endDate) return itemDate <= endDate;
+            if (startDate && endDate) return itemDate >= startDate && itemDate <= endDate;
+            return true;
+          }
+          case "numberRange": {
+            const min = filterValue.min;
+            const max = filterValue.max;
+            
+            if (min !== undefined && max !== undefined) {
+              return itemValue >= min && itemValue <= max;
+            }
+            if (min !== undefined) {
+              return itemValue >= min;
+            }
+            if (max !== undefined) {
+              return itemValue <= max;
             }
             return true;
-          case "numberRange":
-            if (filterValue.min !== undefined && filterValue.max !== undefined) {
-              return itemValue >= filterValue.min && itemValue <= filterValue.max;
-            }
-            return true;
+          }
           case "text":
             return itemValue?.toString().toLowerCase().includes(filterValue.toLowerCase());
           default:
@@ -343,27 +355,51 @@ function DataTable({
     <div className={`bg-white rounded-lg shadow-sm border border-gray-200 ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between p-4 bg-gray-50 rounded-t-lg border-b">
-          <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
-          <div className="flex items-center gap-2">
-              {onAdd && canCreate && (
-                  <button
-                      onClick={onAdd}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-blue-700 transition-colors"
-                  >
-                      <Plus className="w-4 h-4" />
-                      {addButtonText}
-                  </button>
-              )}
-              {enableExport && (
-                  <button
-                      onClick={handleExport}
-                      className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-green-700 transition-colors"
-                  >
-                      <Download className="w-4 h-4" />
-                      Export CSV
-                  </button>
-              )}
+        <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder={searchPlaceholder}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-64"
+            />
           </div>
+          {enableAdvancedFiltering && (
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="relative bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-100 transition-colors"
+            >
+              <Filter className="w-4 h-4" />
+              Filter
+              {getActiveFiltersCount() > 0 && (
+                <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-xs text-white">
+                  {getActiveFiltersCount()}
+                </span>
+              )}
+            </button>
+          )}
+          {onAdd && canCreate && (
+              <button
+                  onClick={onAdd}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-blue-700 transition-colors"
+              >
+                  <Plus className="w-4 h-4" />
+                  {addButtonText}
+              </button>
+          )}
+          {enableExport && (
+              <button
+                  onClick={handleExport}
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-green-700 transition-colors"
+              >
+                  <Download className="w-4 h-4" />
+                  Export CSV
+              </button>
+          )}
+        </div>
       </div>
 
       {/* Bulk Actions Bar */}
