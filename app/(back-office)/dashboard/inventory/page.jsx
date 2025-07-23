@@ -10,6 +10,7 @@ import Link from "next/link";
 function Inventory() {
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState("grid");
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -28,6 +29,12 @@ function Inventory() {
 
     fetchAnalytics();
   }, []);
+
+  const handleViewModeChange = (mode) => {
+    setViewMode(mode);
+    console.log("View mode changed to:", mode);
+    // Burada view mode değişikliğini localStorage'a kaydedebilir veya başka işlemler yapabiliriz
+  };
 
   const optionCards = [
     {
@@ -81,7 +88,11 @@ function Inventory() {
   ];
   return (
     <div>
-      <FixedHeader newLink="/dashboard/inventory/items/new" />
+      <FixedHeader 
+        newLink="/dashboard/inventory/items/new" 
+        viewMode={viewMode}
+        onViewModeChange={handleViewModeChange}
+      />
       
       {/* Analytics Overview */}
       {!loading && analytics && (

@@ -13,7 +13,6 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import SubscriptionCard from "./SubscriptionCard";
 import { useSession } from "next-auth/react";
 import SidebarDropdownLink from "./SidebarDropdownLink";
 import { useState } from "react";
@@ -122,7 +121,6 @@ function Sidebar({ showSidebar, setShowSidebar, collapsed, setCollapsed }) {
           </>
         )}
       </nav>
-      <SubscriptionCard />
       {/* Masaüstünde daralt/expand butonu */}
       <button
         onClick={() => setCollapsed(!collapsed)}

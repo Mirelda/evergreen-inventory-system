@@ -1,7 +1,6 @@
 "use client";
 
 import { ChevronDown, Menu, LogOut, User, Settings } from "lucide-react";
-import SearchInput from "./SearchInput";
 import { useSession, signOut } from "next-auth/react";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
@@ -44,11 +43,6 @@ function Header({ setShowSidebar }) {
         >
           <Menu size={20} />
         </button>
-
-        {/* Search Input - Only visible on desktop */}
-        <div className="hidden md:block">
-          <SearchInput />
-        </div>
       </div>
 
       {/* User Profile Section */}
